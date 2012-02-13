@@ -1,0 +1,57 @@
+How to use lookup.sh
+	./lookup.sh $1
+# $1 = port # of where I'm listening
+
+How to use server.sh
+	./server.sh $1 $2 $3 $4
+# $1 = hostname of BrokerLookupServer
+# $2 = port where BrokerLookupServer is listening
+# $3 = port where I will be listening
+# $4 = my name ("nasdaq" or "tse")
+
+How to use exchange.sh
+	./exchange.sh $1 $2 $3
+# $1 = hostname of where BrokerLookupServer is located
+# $2 = port # where BrokerLookupServer is listening
+# $3 = name of broker you are connecting to ("nasdaq" or "tse")
+
+How to use client.sh:
+	./client.sh $1 $2
+# $1 = hostname of where BrokerLookupServer is located
+# $2 = port # where BrokerLookupServer is listening
+
+
+
+Simple example:
+
+
+On name server side (assuming hostname is ug164)
+./lookup.sh 4444 &
+
+On nasdaq broker side
+./server.sh ug164 4444 3333 nasdaq &
+
+On tse broker side
+./server.sh ug164 4444 2222 tse &
+
+On nasdaq exchange server side - add new nasdaq symbol
+./exchange.sh ug164 4444 nasdaq
+EXCHANGE> add FOO
+EXCHANGE> update FOO 87
+
+On client side - Check for packet forwarding 
+./client.sh ug164 4444 
+CLIENT> local tse
+CLIENT> rim
+CLIENT> msft
+CLIENT> foo
+CLIENT> local nasdaq
+CLIENT> rim
+CLIENT> msft
+CLIENT> foo
+
+Back to nasdaq exchange - remove FOO
+REMOVE> FOO
+
+Back on client side - This should return "foo invalid"
+CLIENT> foo

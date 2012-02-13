@@ -1,0 +1,13 @@
+How to use server.sh
+	./server.sh $1
+# $1 = listening port
+
+How to use exchange.sh
+	./exchange.sh $1 $2
+# $1 = hostname of where OnlineBroker is located
+# $2 = port # where OnlineBroker is listening
+
+How to use client.sh:
+	./client.sh $1 $2
+# $1 = hostname of where OnlineBroker is located
+# $2 = port # where OnlineBroker is listening
