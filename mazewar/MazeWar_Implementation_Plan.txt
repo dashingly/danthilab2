@@ -1,0 +1,14 @@
+Distributed Lab#2
+MazeWar Implementation Plan:
+The plan is to use one of the clients as a server.
+If started with a single parameter port#, client listens for incomming connections and spawns new theads to handle requests. The map and queue of events is held in the main thread which is the local client. 
+Cases:
+- If we get a new incomming connection, we need to:
+	1. Add "initialize the client" to the queue (initialize by placing it at a random location on the map). If we are to broadcast the map right after 		this we do not need to broadcast this action itself.
+	2.  Then we add "send the full map" action to the broadcast queue. Once the time comes, the map is saved and broadcasted to all the clients.
+(CAN we combine this two actions into an atomic command?)
+- If we get an instruction from a known remote client, we simply add it to the queue... Queue can be a hashmap, where we add actions indexed by time of the arrival. To retrive them we can simply get indices and sort them, then send out and remove. To be frank - possibility of TCP loosing and retransmitting packet is quite low on modern networks, thus we can assume that arrival-time is accurate index of order.
+
+
+On the other hand if client is started with combination of "host" and "port" parameters, it shall connect to the server and pass all the actions to the server. Upon recieving the instruction from server, client shall queue it and then execute.
+
