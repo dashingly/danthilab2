@@ -5,7 +5,8 @@ import java.util.*;
 public class ClientHandler extends Thread{
 
         private Socket socket = null;
-        private Hashtable<String, Long>  cache = new Hashtable<String, Long>();
+        //Store the sequence number of the command you last sent
+        private int lastsent = 0;
        
         public ClientHandler(Socket socket, WarServer serve) {
                 super("OnlineBrokerHandlerThread");
@@ -17,8 +18,15 @@ public class ClientHandler extends Thread{
 
                 boolean gotByePacket = false;
                
-                //parse the nasdaq file, and build a cache
-                buildCache();
+                /*
+                 * What we can do is:
+                 * 1. Check for command from the client.
+                 * 2. If there is any -> add it to the queue.
+                 * 3. Send queue operations from queue[lastsent] to queue[current] or to queue[greatest].
+                 * 4. Increment "lastsent" accordingly. 
+                 * 
+                 * But actually the first thing we will have to do is send the seed of the map to the client.
+                 */
                
                 try {
                         /* stream to read from client */
