@@ -12,3 +12,12 @@ Cases:
 
 On the other hand if client is started with combination of "host" and "port" parameters, it shall connect to the server and pass all the actions to the server. Upon recieving the instruction from server, client shall queue it and then execute.
 
+On the client side we will do following:
+1. Client's keyListen will only send respective "event" to the server with the name of the client. NOTE: have to check for names to be unique... or perhaps can make them unique by appending some value.
+2. The mazeImpl will listen to the incomming events from server (should probably spawn a thread). It reads the name and executes respective event on that client (eg. client2.forward()). It will also have to execute events such as:
+	a) generate map for given seed;
+	b) add remote client when "client joins" event is received;
+	c) we can broadcast client join event and then have to make sure we do not add localClient as remote on the client side. Or we can 		send joins to everybody except the client who joined.
+
+Another concern:
+- It seems we do not need to resync any pseudo-random info (eg. location of reborn player) as long as all users start with the same seed and 	make the same number of calls to the generator.

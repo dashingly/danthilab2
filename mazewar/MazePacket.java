@@ -9,21 +9,19 @@ import java.io.Serializable;
 
 
 /* inline class to describe host/port combo */
-class BrokerLocation implements Serializable {
-        public String  broker_host;
-        public Integer broker_port;
+class CEPair implements Serializable {
+	public String  		name;
+    public ClientEvent 	event;
+    
+    public CEPair(String name, ClientEvent event) {
+        this.name 	= name;
+        this.event 	= event;
+    }
         
-        /* constructor */
-        public BrokerLocation(String host, Integer port) {
-                this.broker_host = host;
-                this.broker_port = port;
-        }
-        
-        /* printable output */
-        public String toString() {
-                return " HOST: " + broker_host + " PORT: " + broker_port; 
-        }
-        
+    /* printable output */
+    public String toString() {
+            return " Player: " + this.name + " Event: " + this.event; 
+    }
 }
 
 public class MazePacket implements Serializable {
@@ -33,7 +31,7 @@ public class MazePacket implements Serializable {
          */
         public static final int P_NULL 	= 0;
         public static final int C_INIT 	= 101;
-        public static final int C_OPER	= 102;
+        public static final int C_EVENT	= 102;
         public static final int C_BYE 	= 199;
         
         /* 
@@ -41,30 +39,18 @@ public class MazePacket implements Serializable {
          */
         public static final int S_INIT	= 201;
         public static final int S_OPER 	= 202;
+        public static final int S_BYE 	= 299;
                
         /* error codes */
-        public static final int ERROR_INVALID_OPER   = -101;
-                
-        /* message header */
-        /* for part 1/2/3 */
-        public int type = MazePacket.P_NULL;
+        public static final int ERROR   = -101;
         
-        /* request quote */
-        /* for part 1/2/3 */
-        public String symbol;
+        public int 			type = MazePacket.P_NULL;  
+        public CEPair		pair;
         
-        /* quote */
-        /* for part 1/2/3 */
-        public Long quote;
         
-        /* report errors */
-        /* for part 2/3 */
-        public int error_code;
-        
-        /* exchange lookup */
-        /* for part 3 */
-        public String         exchange;
-        public int            num_locations;
-        public BrokerLocation locations[];
-        
+        /* constructor */
+        public MazePacket(int type, String name, ClientEvent event) {
+        		this.type	= type;
+                CEPair pair = new CEPair(name, event);
+        }
 }

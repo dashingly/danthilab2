@@ -39,11 +39,14 @@ public class ClientHandler extends Thread{
                        
                         while (( packetFromClient = (MazePacket) fromClient.readObject()) != null) {
                                 /* create a packet to send reply back to client */
-                                MazePacket packetToClient = new MazePacket();
-                                packetToClient.type = MazePacket.BROKER_QUOTE;
+                                //MazePacket packetToClient = new MazePacket();
+                                //TODO packetToClient.type = MazePacket.BROKER_QUOTE;
                                
-                                /* process request */
-                                if(packetFromClient.type == MazePacket.BROKER_REQUEST) {
+                                /*
+                                 * It seems like we do not have to worry about sending out seed. The map is created using "mazeSeed" constant.
+                                 * Client wants to connect to the server and needs the seed for the map.
+                                 *
+                                if(packetFromClient.type == MazePacket.C_INIT) {
                                        
                                         //look up the quote from the cache
                                         packetToClient.symbol = packetFromClient.symbol;
@@ -53,24 +56,38 @@ public class ClientHandler extends Thread{
                                        
                                         System.out.println("From Client: " + packetFromClient.symbol);
                                
-                                        /* send reply back to client */
                                         toClient.writeObject(packetToClient);
-                                       
-                                        /* wait for next packet */
                                         continue;
                                 }
                                
-                                /* Sending an ECHO_NULL || ECHO_BYE means quit */
-                                if (packetFromClient.type == MazePacket.BROKER_NULL || packetFromClient.type == MazePacket.BROKER_BYE) {
+                               */
+                                
+                                /* 
+                                 * If client wants to leave we have to broadcast it so that others can remove it locally.
+                                 */
+                                if (packetFromClient.type == MazePacket.P_NULL || packetFromClient.type == MazePacket.C_BYE) {
                                         gotByePacket = true;
-                                        packetToClient = new MazePacket();
-                                        packetToClient.type = MazePacket.BROKER_BYE;
-                                        toClient.writeObject(packetToClient);
+                                        /*
+                                         * TODO: need to write this up
+                                         */
+                                        //toClient.writeObject(packetToClient);
+                                        break;
+                                }
+                                
+                                /* 
+                                 * Here we process client events.
+                                 */
+                                if (packetFromClient.type == MazePacket.C_EVENT) {
+                                        /*
+                                         * TODO: Simply add event to the queue
+                                         */
+                                        
+                                		//toClient.writeObject(packetToClient);
                                         break;
                                 }
                                
                                 /* if code comes here, there is an error in the packet */
-                                System.err.println("ERROR: Unknown BROKER_* packet!!");
+                                System.err.println("ERROR: Unknown packet!!");
                                 System.exit(-1);
                         }
                        
@@ -88,6 +105,7 @@ public class ClientHandler extends Thread{
                 }
         }
        
+        /*
         // build the cache out of the stock file
         private void buildCache() {
                 try {
@@ -101,7 +119,7 @@ public class ClientHandler extends Thread{
                         }
                         in.close();
                 } catch (Exception e) {
-                        /* just print the error stack and exit. */
+                        
                         e.printStackTrace();
                         System.exit(1);
                 }
@@ -125,8 +143,9 @@ public class ClientHandler extends Thread{
                         quote = Long.parseLong(inputQuote);
 
                         // add each (symbol, quote) pair to the cache
-                        cache.put(symbol, quote);
+                        //cache.put(symbol, quote);
                 }
         }
+        */
 
 }
