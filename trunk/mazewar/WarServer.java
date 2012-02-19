@@ -14,38 +14,6 @@ import java.util.*;
  */
 
 public class WarServer{
-
-        /**
-         * The default width of the {@link Maze}.
-         */
-        private final int mazeWidth = 20;
-
-        /**
-         * The default height of the {@link Maze}.
-         */
-        private final int mazeHeight = 10;
-
-        /**
-         * The default random seed for the {@link Maze}.
-         * All implementations of the same protocol must use 
-         * the same seed value, or your mazes will be different.
-         */
-        private final int mazeSeed = 42;
-
-        /**
-         * The {@link Maze} that the game uses.
-         */
-        private Maze maze = null;
-
-        /**
-         * The {@link GUIClient} for the game.
-         */
-        private GUIClient guiClient = null;
-
-        /**
-         * The panel that displays the {@link Maze}.
-         */
-        private OverheadMazePanel overheadPanel = null;
         
         /**
          * Static method for performing cleanup before exiting the game.
@@ -66,21 +34,37 @@ public class WarServer{
                 
         		System.out.println("WarServer started!");
                 
-                // Create the maze
+                /* No need to create the maze
                 maze = new MazeImpl(new Point(mazeWidth, mazeHeight), mazeSeed);
                 assert(maze != null);
-                
+                */
+        		
                 //Initialize server queue
-                squeue = new HashMap<Integer, Object>();
+        		squeue = Collections.synchronizedMap(new TreeMap<Integer, Object>());
+                //squeue = new Hashtable<Integer, Object>();
                 
                 //TODO: How do we simultaneously "push" part of the queue to all clients and then remove that part of the queue.
                 // Throw up a dialog to get the GUIClient name.
                            
                 
         }
-        
-        public Hashtable<Integer, Object> squeue; 
-
+        /**
+         * It is probably a good idea to keep queue private so threads can only add and read events from it.
+         */
+        private Map<Integer, Object> 	squeue; 
+        private int 					lamport;
+        /**
+         * The function for adding events to insure consistency and exclusive access.
+         */
+        public synchronized void Add2Queue(CEPair pair){
+        	this.squeue.put(lamport++, pair);
+        }
+        /**
+         * The function returns the last (highest) key at the moment.
+         */
+        public synchronized int LastEvent(int start){
+        	return ((TreeMap<Integer, Object>) this.squeue).lastKey();
+        }
         
         /**
          * Server for the game. The goal of the server is to order the actions of different remote clients.
@@ -95,7 +79,7 @@ public class WarServer{
         	boolean listening = true;
 
         	try {
-        		if(args.length == 1) {
+        		if((int) args.length == 1) {
         			serverSocket = new ServerSocket(Integer.parseInt(args[0]));
         		} else {
         			System.err.println("ERROR: Invalid arguments!");
