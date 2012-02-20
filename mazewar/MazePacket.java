@@ -44,13 +44,18 @@ public class MazePacket implements Serializable {
         /* error codes */
         public static final int ERROR   = -101;
         
-        public int 			type = MazePacket.P_NULL;  
-        public CEPair		pair;
+        public int 					type = MazePacket.P_NULL;  
+        public static CEPair		pair;
         
         
         /* constructor */
         public MazePacket(int type, String name, ClientEvent event) {
         		this.type	= type;
                 CEPair pair = new CEPair(name, event);
+        }
+        
+        public MazePacket(int type, CEPair event) {
+    		this.type	= type;
+            this.pair = event;
         }
 }

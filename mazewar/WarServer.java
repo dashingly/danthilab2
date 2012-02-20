@@ -51,7 +51,7 @@ public class WarServer{
         /**
          * It is probably a good idea to keep queue private so threads can only add and read events from it.
          */
-        private Map<Integer, Object> 	squeue; 
+        public Map<Integer, Object> 	squeue; 
         private int 					lamport;
         /**
          * The function for adding events to insure consistency and exclusive access.
@@ -62,7 +62,7 @@ public class WarServer{
         /**
          * The function returns the last (highest) key at the moment.
          */
-        public synchronized int LastEvent(int start){
+        public synchronized int LastEvent(){
         	return ((TreeMap<Integer, Object>) this.squeue).lastKey();
         }
         

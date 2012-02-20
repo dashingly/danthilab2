@@ -6,7 +6,7 @@ public class ClientHandler extends Thread{
 
         private Socket socket = null;
         //Store the sequence number of the command you last sent
-        private int lastsent = 0;
+        private int lastSent = 0;
        
         public ClientHandler(Socket socket, WarServer serve) {
                 super("OnlineBrokerHandlerThread");
@@ -14,7 +14,7 @@ public class ClientHandler extends Thread{
                 System.out.println("Created new Thread to handle client");
         }
        
-        public void run() {
+        public void run(WarServer serve) {
 
                 boolean gotByePacket = false;
                
@@ -71,7 +71,7 @@ public class ClientHandler extends Thread{
                                          * TODO: need to write this up
                                          */
                                         //toClient.writeObject(packetToClient);
-                                        break;
+                                        //break;
                                 }
                                 
                                 /* 
@@ -81,14 +81,30 @@ public class ClientHandler extends Thread{
                                         /*
                                          * TODO: Simply add event to the queue
                                          */
-                                        
+                                        serve.Add2Queue(packetFromClient.pair);
                                 		//toClient.writeObject(packetToClient);
-                                        break;
+                                        //break;
                                 }
                                
-                                /* if code comes here, there is an error in the packet */
+                                /*
+                                 * Send the enqueued events out 
+                                 */
+                                {
+                                	int lastQueued = serve.LastEvent();
+                                	while (lastSent < lastQueued)
+                                	{
+                                		// Read in the pair
+                                		lastSent++;
+                                		MazePacket packetToClient = new MazePacket(MazePacket.S_OPER, (CEPair) serve.squeue.get(lastSent));
+                                		// Send the packet out
+                                		toClient.writeObject(packetToClient);
+                                	}
+                                }
+                                
+                                /* if code comes here, there is an error in the packet
                                 System.err.println("ERROR: Unknown packet!!");
                                 System.exit(-1);
+                                */
                         }
                        
                         /* cleanup when client exits */
