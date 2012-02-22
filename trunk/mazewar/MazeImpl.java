@@ -331,7 +331,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * Control loop for {@link Projectile}s.
          */
         public void run() {
-                Collection deadPrj = new HashSet();
+                Collection<Object> deadPrj = new HashSet<Object>();
                 while(true) {
                         if(!projectileMap.isEmpty()) {
                                 Iterator it = projectileMap.keySet().iterator();
@@ -362,8 +362,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
         
         /* Internals */
         
-        private synchronized Collection moveProjectile(Projectile prj) {
-                Collection deadPrj = new LinkedList();
+        private synchronized Collection<Object> moveProjectile(Projectile prj) {
+                Collection<Object> deadPrj = new LinkedList<Object>();
                 assert(prj != null);
                 
                 Object o = projectileMap.get(prj);
@@ -430,6 +430,9 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 }
                 cell.setContents(client);
                 clientMap.put(client, new DirectedPoint(point, d));
+                //TODO: Adding client object to a set, so we can iterate thorough clients later on.
+                clientSet.put(client.getName(), client);
+                
                 client.registerMaze(this);
                 client.addClientListener(this);
                 update();
@@ -563,8 +566,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * A map between {@link Client}s and {@link DirectedPoint}s
          * locating them in the {@link Maze}.
          */
-        private final Map clientMap = new HashMap();
+        private final Map<Client, Point> clientMap = new HashMap<Client, Point>();
 
+        //TODO: This set will store all clients
+        public final Map<String, Client> clientSet = new HashMap<String, Client>();;
+        
         /**
          * The set of {@link MazeListener}s that are presently
          * in the notification queue.

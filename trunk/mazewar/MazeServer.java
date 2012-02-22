@@ -40,10 +40,10 @@ public class MazeServer {
         }
 		
 		// Initialize the queue
-		ServerInQueue = new LinkedList();
+		ServerInQueue = new LinkedList<MazePacket>();
 		
 		// Intialize the set of clients
-		clientSet= new HashSet();
+		clientSet= new HashSet<ClientLocation>();
 		
 		// Initialize the sequence number
 		SequenceNumber = 1;
@@ -169,7 +169,7 @@ public class MazeServer {
 	// Number of Clients
 	private static int NumClients;
 	// Set of Clients (public, no need for synchronization) 
-	public static Set clientSet;
+	public static Set<ClientLocation> clientSet;
 	
 	// Turns debug messages on/off
 	private static boolean DEBUG = true;

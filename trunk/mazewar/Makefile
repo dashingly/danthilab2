@@ -18,21 +18,21 @@ CAT=cat
 
 #all: ${FILES}
 all: 
-	${JAVA_HOME}/bin/javac *.java
+	javac *.java
 
 # Rule for making classes.
 # %.class : %.java 
-	# ${JAVAC} $<
+        # ${JAVAC} $<
 
 # Build dependencies.  Need jikes to do this.
 #dep:
-#	${JIKES} +M *.java
-#	${CAT} *.u > Makefile.dep
-#	${RM} *.u
+#       ${JIKES} +M *.java
+#       ${CAT} *.u > Makefile.dep
+#       ${RM} *.u
 
 # Create documentation using javadoc
 docs:
-	${JAVADOC} -d docs *.java
+        ${JAVADOC} -d docs *.java
 
 # Clean up
 clean: 
@@ -43,4 +43,5 @@ clean:
 
 # docs isn't a real target
 .PHONY : docs
+
 

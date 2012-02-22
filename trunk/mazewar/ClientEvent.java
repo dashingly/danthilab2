@@ -35,6 +35,8 @@ public class ClientEvent {
         private static final int TURN_RIGHT = 3;
         private static final int FIRE = 4;
         
+        private static final int ADD = 7;
+        
         /**
          * Default to 0, to be invalid.
          */
@@ -79,6 +81,11 @@ public class ClientEvent {
          * Generated when a {@link Client} fires.
          */
         public static final ClientEvent fire = new ClientEvent(FIRE);
+        
+        /**
+         * We need this to initialize clients.
+         */
+        public static final ClientEvent add = new ClientEvent(ADD);
         
         
 }
