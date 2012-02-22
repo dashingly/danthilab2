@@ -1,10 +1,7 @@
 import java.io.Serializable;
  /**
  * MazePacket
- * ============
- * 
  * Packet format of the packets exchanged between the MazeWar Client and the Server
- * 
  */
 
 public class MazePacket implements Serializable {

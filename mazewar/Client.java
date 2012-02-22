@@ -218,6 +218,13 @@ public abstract class Client {
         }
         
         /**
+         * Notify listeners that the client is added.
+         */
+        private void notifyAdd() {
+                notifyListeners(ClientEvent.add);       
+        }
+        
+        /**
          * Send a the specified {@link ClientEvent} to all registered listeners
          * @param ce Event to be sent.
          */

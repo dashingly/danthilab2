@@ -33,6 +33,7 @@ import java.awt.Shape;
 import java.awt.BasicStroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Line2D.Double;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
@@ -59,7 +60,7 @@ public class OverheadMazePanel extends JPanel implements MazeListener {
         /**
          * The wall cache.
          */
-        private ArrayList wallList = null;
+        private ArrayList<Double> wallList = null;
 
         /** 
          * The player shape cache.
@@ -266,7 +267,7 @@ public class OverheadMazePanel extends JPanel implements MazeListener {
          */
         private void buildWalls(double x, double y, double width, double height) {
                 Point p = maze.getSize();
-                wallList = new ArrayList(p.getX() * p.getY());
+                wallList = new ArrayList<Double>(p.getX() * p.getY());
                 for(int i = 0; i < p.getY(); i++) {
                         for(int j = 0; j < p.getX(); j++) {
                                 Cell cell = maze.getCell(new Point(j,i));

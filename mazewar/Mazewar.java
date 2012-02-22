@@ -60,7 +60,7 @@ public class Mazewar extends JFrame {
         /**
          * The {@link Maze} that the game uses.
          */
-        private Maze maze = null;
+        private MazeImpl maze = null;
 
         /**
          * The {@link GUIClient} for the game.
@@ -162,7 +162,7 @@ public class Mazewar extends JFrame {
                 this.addKeyListener(guiClient);
 				
 				// TM: Client Listener that connects to network
-				MazeClientHandler networkClientListener = new MazeClientHandler(hostname, port, guiClient);
+				MazeClientHandler networkClientListener = new MazeClientHandler(hostname, port, guiClient, maze);
 				guiClient.addClientListener(networkClientListener);
 				
                 

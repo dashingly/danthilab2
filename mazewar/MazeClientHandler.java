@@ -7,35 +7,26 @@
 // Just copied and pasted the import list from MazeImpl.java
 import java.lang.Thread;
 import java.lang.Runnable;
-import java.io.Serializable;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Random;
-import java.util.Vector;  
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.HashMap;
+import java.io.*;
+import java.util.*;
 import java.net.*;
 
 
 public class MazeClientHandler implements Serializable, ClientListener, Runnable{
 
 
+	//Object contains maze with all the clients.
+	private static MazeImpl maze;
+	
 	//constructor
-	public MazeClientHandler(String hostname, int port, GUIClient client) {
+	//public MazeClientHandler(String hostname, int port, GUIClient client) {
+	public MazeClientHandler(String hostname, int port, GUIClient client, MazeImpl mazeStr) {
 		this.hostname = hostname;
 		this.port = port;
 		// Add the ClientEcho object as a reference
 		assert(client != null);
 		this.theGUIClient = client;
+		this.maze = mazeStr;
 		
 		// Start the MazeClientHandler
 		thread = new Thread(this);
@@ -81,41 +72,96 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			inStream = new ObjectInputStream(clientSocket.getInputStream());
 			// Packet received from the Server
 			MazePacket packetFromServer;
+			//Client to address
+			Client curClient; 
 			
 			while (active) {
 				if(( packetFromServer = (MazePacket) inStream.readObject()) != null) {
-					/* process request */
-					// THIERRY: This part is temporary, obviously we need to have it change the map
-					switch (packetFromServer.type) {
-						case MazePacket.CLIENT_EVENT:
-							// Just print it
-							if (DEBUG) {
+					
+					/*
+					 * TODO: Two cases:
+					 * 1. Client being added 	Check to make sure client is not in the list.
+					 * 2. Client event 			Check to make sure client is in our clientSet.
+					 * 
+					 * There is a problem with adding clients:
+					 * 		Given seeds solves all problems, except for initialization of clients - they have to initialize in the same order, 
+					 * 		otherwise they will be mapped to the same location.
+					 */
+					if (packetFromServer.type == MazePacket.ADD_CLIENT)
+					{
+						//TODO: Client addition is tricky. Leave it till later.
+					}
+					else
+					{
+						// Make sure client exists locally.
+						if (maze.clientSet.containsKey(packetFromServer.ClientName))	
+						{
+							curClient = maze.clientSet.get(packetFromServer.ClientName);
+						}
+						else
+						{
+							System.out.println("ERROR: Client with name " + packetFromServer.ClientName + " is not known on this machine.");
+							continue;
+						}
+						
+						
+						switch (packetFromServer.type) {
+							case MazePacket.CLIENT_EVENT:
+								// Just print it
+								if (DEBUG) {
+									switch (packetFromServer.ce) {
+										case MOVE_FORWARD:
+											System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is moving forward");
+											break;
+										case MOVE_BACKWARD:
+											System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is moving backwards");
+											break;
+										case TURN_LEFT:
+											System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is turning left");
+											break;
+										case TURN_RIGHT:
+											System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is turning right");
+											break;
+										case FIRE:
+											System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is firing");
+											break;
+										default:
+											System.out.println("CLIENT DEBUG: Unknown event from server " + packetFromServer.ClientName);
+									}
+								}
+								
+								
 								switch (packetFromServer.ce) {
 									case MOVE_FORWARD:
-										System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is moving forward");
+										maze.moveClientForward(curClient);
 										break;
 									case MOVE_BACKWARD:
-										System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is moving backwards");
+										maze.moveClientBackward(curClient);
 										break;
 									case TURN_LEFT:
-										System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is turning left");
+										/*
+										 * This is done write away through MazeImpl... which is wrong. 
+										 * For once we now need to distinguish remote and local clients to act here.
+										 */
 										break;
 									case TURN_RIGHT:
-										System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is turning right");
+										//This is done write away through MazeImpl... which seems wrong.
 										break;
 									case FIRE:
-										System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is firing");
+										maze.clientFire(curClient);
 										break;
 									default:
 										System.out.println("CLIENT DEBUG: Unknown event from server " + packetFromServer.ClientName);
 								}
-							}
-							break;
-						default:
-							/* if code comes here, there is an error in the packet */
-							System.err.println("ERROR: Unknown packet!!");
-							System.exit(-1);
+								
+								break;
+							default:
+								/* if code comes here, there is an error in the packet */
+								System.err.println("ERROR: Unknown packet!!");
+								System.exit(-1);
+						}
 					}
+					
 				}
 			}
 			/* cleanup when client exits */
@@ -130,6 +176,9 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	}
 	
 	// Function that handles the GUIclient's updates
+	/*
+	 * TODO: Seems to me it runs under GUI-thread and not MazeClientHandler-thread.
+	 */
 	public void clientUpdate(Client c, ClientEvent ce) {
 			if (DEBUG) {
 				System.out.println("CLIENT DEBUG: MazeClientHandler Listener notified");
