@@ -47,6 +47,11 @@ public class ClientEvent {
                 assert((event >= 0) && (event <= 4));
                 this.event = event;
         }
+		
+		// Getter 
+		public int getEvent() {
+			return this.event;
+		}
 
         /* Public data ****************************************************/
         

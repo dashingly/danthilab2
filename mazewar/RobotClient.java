@@ -28,7 +28,7 @@ import java.lang.Runnable;
  * @version $Id: RobotClient.java 345 2004-01-24 03:56:27Z geoffw $
  */
  
-public class RobotClient extends LocalClient implements Runnable {
+public class RobotClient extends Client implements Runnable {
 
         /**
          * Random number generator so that the robot can be

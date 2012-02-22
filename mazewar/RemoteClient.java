@@ -35,6 +35,5 @@ public class RemoteClient extends Client {
 
         /**
          * May want to fill in code here.
-         */
-        //TODO
+         */ 
 }
