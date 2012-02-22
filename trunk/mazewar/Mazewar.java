@@ -26,7 +26,10 @@ import javax.swing.JOptionPane;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import javax.swing.BorderFactory;
-import java.io.Serializable;
+import java.net.*;
+import java.io.*;
+import java.lang.Object;
+
 
 /**
  * The entry point and glue code for the game.  It also contains some helpful
@@ -119,9 +122,20 @@ public class Mazewar extends JFrame {
         /** 
          * The place where all the pieces are put together. 
          */
-        public Mazewar() {
+        public Mazewar(String args[]) {
                 super("ECE419 Mazewar");
                 consolePrintLn("ECE419 Mazewar started!");
+				
+				// TM: Read in the arguments: hostname and port
+				String hostname = "ug160.eecg.utoronto.ca";
+				int port = 4444;
+				if(args.length == 2 ) {
+					hostname = args[0];
+					port = Integer.parseInt(args[1]);
+				} else {
+					System.err.println("ERROR: Invalid arguments!");
+					System.exit(-1);
+				}
                 
                 // Create the maze
                 maze = new MazeImpl(new Point(mazeWidth, mazeHeight), mazeSeed);
@@ -146,6 +160,11 @@ public class Mazewar extends JFrame {
                 guiClient = new GUIClient(name);
                 maze.addClient(guiClient);
                 this.addKeyListener(guiClient);
+				
+				// TM: Client Listener that connects to network
+				MazeClientHandler networkClientListener = new MazeClientHandler(hostname, port, guiClient);
+				guiClient.addClientListener(networkClientListener);
+				
                 
                 // Use braces to force constructors not to be called at the beginning of the
                 // constructor.
@@ -224,6 +243,6 @@ public class Mazewar extends JFrame {
         public static void main(String args[]) {
 
                 /* Create the GUI */
-                new Mazewar();
+                new Mazewar(args);
         }
 }

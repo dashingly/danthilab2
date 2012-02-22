@@ -16,6 +16,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 USA.
 */
+  
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * An abstract class for {@link Client}s in a {@link Maze} that local to the 
@@ -38,9 +42,127 @@ public abstract class LocalClient extends Client {
                 super(name);
                 assert(name != null);
         }
+		
+		/**
+         * Add an object to be notified when this {@link Client} performs an 
+         * action.
+         * @param cl An object that implementing the {@link ClientListener cl}
+         * interface.
+         */
+        public void addClientListener(ClientListener cl) {
+                assert(cl != null);
+                listenerSet.add(cl);
+        }
+        
+        /**
+         * Remove an object from the action notification queue.
+         * @param cl The {@link ClientListener} to remove.
+         */
+        public void removeClientListener(ClientListener cl) {
+                listenerSet.remove(cl);
+        }
 
         /**
-         * Fill in here??
+         * Move the client forward.
+         * @return <code>true</code> if move was successful, otherwise <code>false</code>.
          */
-        //TODO
+        protected boolean forward() {
+				notifyMoveForward();
+				return true;
+        }
+        
+        /**
+         * Move the client backward.
+         * @return <code>true</code> if move was successful, otherwise <code>false</code>.
+         */
+        protected boolean backup() {
+                notifyMoveBackward();
+				return true;
+        }
+        
+        /**
+         * Turn the client ninety degrees counter-clockwise.
+         */
+        protected void turnLeft() {
+                notifyTurnLeft();
+        }
+        
+        /**
+         * Turn the client ninety degrees clockwise.
+         */
+        protected void turnRight() {
+                notifyTurnRight();
+        }
+        
+        /**
+         * Fire a projectile.
+         * @return <code>true</code> if a projectile was successfully launched, otherwise <code>false</code>.
+         */
+        protected boolean fire() {
+				notifyFire();
+				return true;
+        }
+		
+		/** 
+         * Notify listeners that the client moved forward.
+         */
+        private void notifyMoveForward() {
+                notifyListeners(ClientEvent.moveForward);
+        }
+        
+        /**
+         * Notify listeners that the client moved backward.
+         */
+        private void notifyMoveBackward() {
+                notifyListeners(ClientEvent.moveBackward);
+        }
+        
+        /**
+         * Notify listeners that the client turned right.
+         */
+        private void notifyTurnRight() {
+                notifyListeners(ClientEvent.turnRight);
+        }
+        
+        /**
+         * Notify listeners that the client turned left.
+         */
+        private void notifyTurnLeft() {
+                notifyListeners(ClientEvent.turnLeft);       
+        }
+        
+        /**
+         * Notify listeners that the client fired.
+         */
+        private void notifyFire() {
+                notifyListeners(ClientEvent.fire);       
+        }
+        
+        /**
+         * Send a the specified {@link ClientEvent} to all registered listeners
+         * @param ce Event to be sent.
+         */
+        private void notifyListeners(ClientEvent ce) {
+                assert(ce != null);
+                Iterator i = listenerSet.iterator();
+                while (i.hasNext()) {
+                        Object o = i.next();
+                        assert(o instanceof ClientListener);
+                        ClientListener cl = (ClientListener)o;
+                        cl.clientUpdate(this, ce);
+                } 
+        }
+		
+		/* Internals ******************************************************/        
+        
+
+        /**
+         * Maintain a set of listeners.
+         */
+        private Set listenerSet = new HashSet();
+        
+        /**
+         * Name of the client.
+         */
+        private String name = null;
 }
