@@ -172,9 +172,11 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 										 * This is done write away through MazeImpl... which is wrong. 
 										 * For once we now need to distinguish remote and local clients to act here.
 										 */
+										maze.rotateClientLeft(curClient);
 										break;
 									case TURN_RIGHT:
 										//This is done write away through MazeImpl... which seems wrong.
+										maze.rotateClientRight(curClient);
 										break;
 									case FIRE:
 										maze.clientFire(curClient);

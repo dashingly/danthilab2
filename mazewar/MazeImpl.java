@@ -328,11 +328,13 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          */
         public void clientUpdate(Client c, ClientEvent ce) {
                 // When a client turns, update our state.
+        	/*
                 if(ce == ClientEvent.turnLeft) {
                         rotateClientLeft(c);
                 } else if(ce == ClientEvent.turnRight) {
                         rotateClientRight(c);
                 }
+           */
         }
 
         /**
@@ -484,7 +486,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * Internal helper called when a {@link Client} emits a turnLeft action.
          * @param client The {@link Client} to rotate.
          */
-        private synchronized void rotateClientLeft(Client client) {
+        public synchronized void rotateClientLeft(Client client) {
                 assert(client != null);
                 Object o = clientMap.get(client);
                 assert(o instanceof DirectedPoint);
@@ -497,7 +499,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * Internal helper called when a {@link Client} emits a turnRight action.
          * @param client The {@link Client} to rotate.
          */
-        private synchronized void rotateClientRight(Client client) {
+        public synchronized void rotateClientRight(Client client) {
                 assert(client != null);
                 Object o = clientMap.get(client);
                 assert(o instanceof DirectedPoint);
