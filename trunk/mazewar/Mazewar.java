@@ -114,10 +114,15 @@ public class Mazewar extends JFrame {
                 // Put any network clean-up code you might have here.
                 // (inform other implementations on the network that you have 
                 //  left, etc.)
-                
+                /*
+                 * TODO: Need to send out a message to server saying we want out.
+                 */
+        	
 
                 System.exit(0);
         }
+        
+        
        
         /** 
          * The place where all the pieces are put together. 
@@ -158,22 +163,30 @@ public class Mazewar extends JFrame {
                 
                 // Create the GUIClient and connect it to the KeyListener queue
                 guiClient = new GUIClient(name);
-                maze.addClient(guiClient);
+                //This is disabled so that we can enforce the order at which players join the game.
+                //maze.addClient(guiClient);
                 this.addKeyListener(guiClient);
+                
 				
 				// TM: Client Listener that connects to network
 				MazeClientHandler networkClientListener = new MazeClientHandler(hostname, port, guiClient, maze);
 				guiClient.addClientListener(networkClientListener);
 				
+				//TODO: Spin while we did not add the GUIclient after server approved order.
+				//while (maze.waiting){}
+				
+				
                 
                 // Use braces to force constructors not to be called at the beginning of the
                 // constructor.
+                /*
                 {
                         maze.addClient(new RobotClient("Norby"));
                         maze.addClient(new RobotClient("Robbie"));
                         maze.addClient(new RobotClient("Clango"));
                         maze.addClient(new RobotClient("Marvin"));
                 }
+                */
 
                 
                 // Create the panel that will display the maze.

@@ -85,5 +85,5 @@ public class MazeServerReplierThread extends Thread {
 	// Set of ObjectOutputStream (warning! ensure that all clients have been added first)
 	private static Set outputStreamSet;
 	// Number of client the server waits to add until it starts
-	private static int ClientNum = 1;
+	private static int ClientNum = 2;
 }

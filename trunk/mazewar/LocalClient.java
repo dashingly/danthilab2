@@ -41,6 +41,8 @@ public abstract class LocalClient extends Client {
         public LocalClient(String name) {
                 super(name);
                 assert(name != null);
+                //The next step is not necessary, since we send "ADD_CLIENT" packet when starting the mediator-thread.
+                //notifyAdd();
         }
 		
 		/**
@@ -136,6 +138,13 @@ public abstract class LocalClient extends Client {
          */
         private void notifyFire() {
                 notifyListeners(ClientEvent.fire);       
+        }
+        
+        /**
+         * Notify listeners that the client is added.
+         */
+        private void notifyAdd() {
+                notifyListeners(ClientEvent.add);       
         }
         
         /**
