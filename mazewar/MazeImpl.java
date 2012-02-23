@@ -434,6 +434,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 assert(client != null);
                 assert(checkBounds(point));
                 CellImpl cell = getCellImpl(point);
+                //TODO
+                System.out.println("Adding client test random.");
                 Direction d = Direction.random();
                 while(cell.isWall(d)) {
                   d = Direction.random();
@@ -472,6 +474,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         point = new Point(randomGen.nextInt(maxX),randomGen.nextInt(maxY));
                         cell = getCellImpl(point);
                 }
+                //TODO
+                System.out.println("Replacing client test random.");
                 Direction d = Direction.random();
                 while(cell.isWall(d)) {
                         d = Direction.random();
