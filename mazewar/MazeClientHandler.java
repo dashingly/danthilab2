@@ -91,11 +91,8 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 					 * 		Given seeds solves all problems, except for initialization of clients - they have to initialize in the same order, 
 					 * 		otherwise they will be mapped to the same location.
 					 */
-					System.out.println("TEST 1 TEST");
-					
 					if (packetFromServer.type == MazePacket.ADD_CLIENT)
-					{
-						System.out.println("TEST 22222222");
+					{						
 						// TODO: We need to check for duplicate names at the server side. We can also do it here.
 						if (maze.clientSet.containsKey(packetFromServer.ClientName))	
 						{
@@ -105,11 +102,11 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 						}
 						else
 						{
-							System.out.println("TEST 33333 " + theGUIClient.getName() + " and also " + packetFromServer.ClientName);
+							
 							//Check if this is a local client we are adding
 							if ((packetFromServer.ClientName).equals(theGUIClient.getName()))
 							{
-								System.out.println("TEST 44444");
+								
 								maze.addClient(theGUIClient);
 								maze.waiting = false;
 							}
@@ -132,8 +129,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 							System.out.println("ERROR: Client with name " + packetFromServer.ClientName + " is not known on this machine.");
 							continue;
 						}
-						
-						
+												
 						switch (packetFromServer.type) {
 							case MazePacket.CLIENT_EVENT:
 								// Just print it
