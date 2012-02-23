@@ -31,8 +31,11 @@ public class Direction {
         
         /**
          * Create a random number generator to produce random directions.
+         * I added the seed to make behaviour predictable.
          */
-        private static Random randomGen = new Random();
+		private static int DSeed 		= 77;
+        private static Random randomGen = new Random(DSeed);
+        
         
         /** 
          * Internal representation of directions

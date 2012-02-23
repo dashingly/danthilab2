@@ -172,9 +172,14 @@ public class Mazewar extends JFrame {
 				MazeClientHandler networkClientListener = new MazeClientHandler(hostname, port, guiClient, maze);
 				guiClient.addClientListener(networkClientListener);
 				
-				//TODO: Spin while we did not add the GUIclient after server approved order.
-				while (maze.waiting){}
-				
+				//TODO: Spin while we did not add the GUIclient after server approved order. For some reason this boolean check does not work.
+				//while (maze.waiting){}
+				try {
+					Thread.sleep(4000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
                 
                 // Use braces to force constructors not to be called at the beginning of the
