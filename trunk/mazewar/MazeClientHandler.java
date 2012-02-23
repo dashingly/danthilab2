@@ -109,6 +109,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 								
 								maze.addClient(theGUIClient);
 								maze.waiting = false;
+								System.out.println("RELEASED the WAITING lock.");
 							}
 							else
 							{

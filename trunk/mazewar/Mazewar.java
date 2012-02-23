@@ -173,7 +173,7 @@ public class Mazewar extends JFrame {
 				guiClient.addClientListener(networkClientListener);
 				
 				//TODO: Spin while we did not add the GUIclient after server approved order.
-				//while (maze.waiting){}
+				while (maze.waiting){}
 				
 				
                 
