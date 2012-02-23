@@ -31,6 +31,7 @@ public class MazeServerHandlerThread extends Thread {
 					case MazePacket.ADD_CLIENT:
 						// Add the client
 						MazeServer.addClient(packetFromClient, socket);
+						MazeServer.addToServerInQueue(packetFromClient);
 						break;
 					case MazePacket.CLIENT_EVENT:
 						// Add the packet to the ServerInQueue

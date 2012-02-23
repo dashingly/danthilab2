@@ -44,6 +44,9 @@ import java.util.HashMap;
 
 public class MazeImpl extends Maze implements Serializable, ClientListener, Runnable {
 
+	
+	
+	
         /**
          * Create a {@link Maze}.
          * @param point Treat the {@link Point} as a magintude specifying the
@@ -79,6 +82,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 thread.start();
         }
        
+        /*
+    	 * This is a variable that will allow us to wait on the other players to enforce order.
+    	 */
+    	public boolean waiting = true;
+    	
         /** 
          * Create a maze from a serialized {@link MazeImpl} object written to a file.
          * @param mazefile The filename to load the serialized object from.

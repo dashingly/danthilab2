@@ -15,8 +15,10 @@ import java.net.*;
 public class MazeClientHandler implements Serializable, ClientListener, Runnable{
 
 
+	
 	//Object contains maze with all the clients.
 	private static MazeImpl maze;
+	private String selfName;
 	
 	//constructor
 	//public MazeClientHandler(String hostname, int port, GUIClient client) {
@@ -26,7 +28,9 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 		// Add the ClientEcho object as a reference
 		assert(client != null);
 		this.theGUIClient = client;
-		this.maze = mazeStr;
+		assert(selfName != null);
+		
+		this.maze 		= mazeStr;
 		
 		// Start the MazeClientHandler
 		thread = new Thread(this);
@@ -87,9 +91,34 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 					 * 		Given seeds solves all problems, except for initialization of clients - they have to initialize in the same order, 
 					 * 		otherwise they will be mapped to the same location.
 					 */
+					System.out.println("TEST 1 TEST");
+					
 					if (packetFromServer.type == MazePacket.ADD_CLIENT)
 					{
-						//TODO: Client addition is tricky. Leave it till later.
+						System.out.println("TEST 22222222");
+						// TODO: We need to check for duplicate names at the server side. We can also do it here.
+						if (maze.clientSet.containsKey(packetFromServer.ClientName))	
+						{
+							System.out.println("ERROR: Client with name " + packetFromServer.ClientName + " already exists locally.");
+							continue;
+							
+						}
+						else
+						{
+							System.out.println("TEST 33333 " + theGUIClient.getName() + " and also " + packetFromServer.ClientName);
+							//Check if this is a local client we are adding
+							if ((packetFromServer.ClientName).equals(theGUIClient.getName()))
+							{
+								System.out.println("TEST 44444");
+								maze.addClient(theGUIClient);
+								maze.waiting = false;
+							}
+							else
+							{
+								maze.addClient(new RemoteClient(packetFromServer.ClientName));
+								// How do I add client as a listener to mazewar... Do I need to?
+							}
+						}
 					}
 					else
 					{
@@ -189,7 +218,10 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			assert(outStream != null);
 			// Create an clientEvent message for the Server
 			MazePacket packetToServer = new MazePacket();
-			packetToServer.type = MazePacket.CLIENT_EVENT;
+			// Set the header
+			if (ce.getEvent()== ADD)			packetToServer.type = MazePacket.ADD_CLIENT;
+			else								packetToServer.type = MazePacket.CLIENT_EVENT;
+			
 			packetToServer.ClientName = theGUIClient.getName();
 			packetToServer.ce = ce.getEvent();
 			// Debug printouts
@@ -209,6 +241,9 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 						break;
 					case FIRE:
 						System.out.println("CLIENT DEBUG: GUI client fires.");
+						break;
+					case ADD:
+						System.out.println("CLIENT DEBUG: GUI client is being added.");
 						break;
 				}
 			}
@@ -232,7 +267,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	private static ObjectOutputStream outStream = null;
 	private static ObjectInputStream inStream = null;
 	// Reference to the GUIClient we are listening to
-	private static GUIClient theGUIClient = null;
+	private GUIClient theGUIClient = null;
 	// Thread
 	private final Thread thread;
 	// Flag to say whether the control thread is active
@@ -242,11 +277,12 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	private static boolean DEBUG = true;
 	
 	// Need to copy those locally: the clientevent class protects those
-	private static final int MOVE_FORWARD = 0;
-	private static final int MOVE_BACKWARD = 1;
-	private static final int TURN_LEFT = 2;
-	private static final int TURN_RIGHT = 3;
-	private static final int FIRE = 4;
+	private static final int MOVE_FORWARD 	= 0;
+	private static final int MOVE_BACKWARD 	= 1;
+	private static final int TURN_LEFT 		= 2;
+	private static final int TURN_RIGHT 	= 3;
+	private static final int FIRE 			= 4;
+	private static final int ADD 			= 7;
 	
 
 }
