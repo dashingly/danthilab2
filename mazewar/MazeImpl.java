@@ -424,7 +424,7 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                  * Here we were supposed to clean up.
                                  * Let's check whether we did.
                                  */
-                                System.out.println("Dead projectile after assert " + newCell.getContents());
+                                System.out.println("Is it empty? " + newCell.getContents() + " is inside");
                                 deadPrj.add(prj);
                                 deadPrj.add(contents);
                                 update();
