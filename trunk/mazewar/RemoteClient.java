@@ -17,6 +17,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 USA.
 */
   
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Iterator;
+  
 /**
  * A skeleton for those {@link Client}s that correspond to clients on other computers.
  * @author Geoffrey Washburn &lt;<a href="mailto:geoffw@cis.upenn.edu">geoffw@cis.upenn.edu</a>&gt;
@@ -33,7 +37,34 @@ public class RemoteClient extends Client {
                 super(name);
         }
 
+		/**
+         * Add an object to be notified when this {@link Client} performs an 
+         * action.
+         * @param cl An object that implementing the {@link ClientListener cl}
+         * interface.
+         */
+        public void addClientListener(ClientListener cl) {
+                assert(cl != null);
+                listenerSet.add(cl);
+        }
+        
         /**
-         * May want to fill in code here.
-         */ 
+         * Remove an object from the action notification queue.
+         * @param cl The {@link ClientListener} to remove.
+         */
+        public void removeClientListener(ClientListener cl) {
+                listenerSet.remove(cl);
+        }
+
+		/* Internals ******************************************************/        
+        
+        /**
+         * Maintain a set of listeners.
+         */
+        private Set listenerSet = new HashSet();
+        
+        /**
+         * Name of the client.
+         */
+        private String name = null;
 }

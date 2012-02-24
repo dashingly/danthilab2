@@ -327,14 +327,12 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * @param ce The action the {@link Client} performed.
          */
         public void clientUpdate(Client c, ClientEvent ce) {
-                // When a client turns, update our state.
-        	/*
-                if(ce == ClientEvent.turnLeft) {
-                        rotateClientLeft(c);
-                } else if(ce == ClientEvent.turnRight) {
-                        rotateClientRight(c);
-                }
-           */
+				// Leave it empty from now on
+				// if(ce == ClientEvent.turnLeft) {
+						// rotateClientLeft(c);
+				// } else if(ce == ClientEvent.turnRight) {
+						// rotateClientRight(c);
+				// }
         }
 
         /**
@@ -460,8 +458,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 }
                 cell.setContents(client);
                 clientMap.put(client, new DirectedPoint(point, d));
-                //TODO: Adding client object to a set, so we can iterate thorough clients later on.
-                clientSet.put(client.getName(), client);
                 
                 client.registerMaze(this);
                 client.addClientListener(this);
@@ -599,9 +595,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * locating them in the {@link Maze}.
          */
         private final Map<Client, Point> clientMap = new HashMap<Client, Point>();
-
-        //TODO: This set will store all clients
-        public final Map<String, Client> clientSet = new HashMap<String, Client>();;
         
         /**
          * The set of {@link MazeListener}s that are presently

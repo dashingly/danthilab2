@@ -19,7 +19,7 @@ public class MazeServerReplierThread extends Thread {
 	
 	public void run() {
 		// First wait until there are enough clients connected to start the game
-		while (MazeServer.getNumClient() < ClientNum) {
+		while (MazeServer.getNumClient() < MazeServer.ClientNum) {
 			// Sleep 
 			try {
 				sleep(100);
@@ -46,6 +46,28 @@ public class MazeServerReplierThread extends Thread {
 				e.printStackTrace();
 			}
 		}
+		
+		// Send the client add start sequence
+		while(MazeServer.peekFromClientAddQueue()) {
+			MazePacket packetToClient = (MazePacket) MazeServer.removeFromClientAddQueue();
+			if (DEBUG)
+				System.out.println("SERVER DEBUG: Sending start sequence: " + packetToClient.ClientName);
+			assert (packetToClient != null);
+			// Now that we've retrieved a MazePacket from the ServerInQueue, we can broadcast it to everyone
+			Iterator ossi = outputStreamSet.iterator();
+			while (ossi.hasNext()) {
+				Object o = ossi.next();
+				assert(o instanceof ObjectOutputStream);
+				ObjectOutputStream toClient = (ObjectOutputStream)o;
+				try {
+					/* stream to read from client */
+					toClient.writeObject(packetToClient);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		// Just dequeues and broadcasts
 		while (active) {
 			if(MazeServer.peekFromServerInQueue()) {
@@ -84,6 +106,4 @@ public class MazeServerReplierThread extends Thread {
 	private static boolean active = false;
 	// Set of ObjectOutputStream (warning! ensure that all clients have been added first)
 	private static Set outputStreamSet;
-	// Number of client the server waits to add until it starts
-	private static int ClientNum = 2;
 }

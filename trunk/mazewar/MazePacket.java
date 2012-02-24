@@ -23,7 +23,13 @@ public class MazePacket implements Serializable {
 	/* client name */
 	public String ClientName;
 	
+	/* server max player */
+	public int MaxNumClient;
+	
 	/* client event */
 	public int ce;
+	
+	/* max num client */
+	
 	
 }
