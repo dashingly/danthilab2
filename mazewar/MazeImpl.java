@@ -408,6 +408,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 CellImpl newCell = getCellImpl(newPoint);
                 Object contents = newCell.getContents();
                 if(contents != null) {
+                		//TODO: DEBUGGING
+                	System.out.println("Contents are " + newCell.getContents() + " is inside");
                         // If it is a Client, kill it outright
                         if(contents instanceof Client) {
                                 killClient(prj.getOwner(), (Client)contents);
@@ -424,7 +426,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                  * Here we were supposed to clean up.
                                  * Let's check whether we did.
                                  */
-                                System.out.println("Is it empty? " + newCell.getContents() + " is inside");
+                                System.out.println("Is it new empty?  " + newCell.getContents() + " is inside");
+                                System.out.println("Is it old empty?   " + cell.getContents() + " is inside");
                                 deadPrj.add(prj);
                                 deadPrj.add(contents);
                                 update();
