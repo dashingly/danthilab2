@@ -90,11 +90,11 @@ public class MazeServerReplierThread extends Thread {
 				}
 			}
 			// Sleep 
-			try {
-					sleep(100);
-			} catch(Exception e) {
+			// try {
+					// sleep(100);
+			// } catch(Exception e) {
 					// Shouldn't happen.
-			}
+			// }
 		}
 	}
 
