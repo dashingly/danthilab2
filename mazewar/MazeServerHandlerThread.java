@@ -30,8 +30,9 @@ public class MazeServerHandlerThread extends Thread {
 				switch (packetFromClient.type) {
 					case MazePacket.ADD_CLIENT:
 						// Add the client
+						packetFromClient.MaxNumClient = MazeServer.ClientNum;
 						MazeServer.addClient(packetFromClient, socket);
-						MazeServer.addToServerInQueue(packetFromClient);
+						MazeServer.addToClientAddQueue(packetFromClient);
 						break;
 					case MazePacket.CLIENT_EVENT:
 						// Add the packet to the ServerInQueue

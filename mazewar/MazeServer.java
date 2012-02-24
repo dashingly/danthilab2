@@ -42,6 +42,9 @@ public class MazeServer {
 		// Initialize the queue
 		ServerInQueue = new LinkedList<MazePacket>();
 		
+		// Initialize the queue
+		ClientAddQueue = new LinkedList<MazePacket>();
+		
 		// Intialize the set of clients
 		clientSet= new HashSet<ClientLocation>();
 		
@@ -153,6 +156,56 @@ public class MazeServer {
 			return false;
 	}
 
+	// Handles the synchronized add to the ClientAddQueue
+	public static synchronized boolean addToClientAddQueue(MazePacket packetFromClient) {
+			assert(packetFromClient != null);
+			String ClientName = packetFromClient.ClientName;
+			
+			try {
+				// Enqueuing command
+				if (DEBUG)
+					System.out.println("SERVER DEBUG: Enqueuing add command into the MazeServerQueue issued by " + packetFromClient.ClientName);
+				ClientAddQueue.add(packetFromClient);
+			} catch (IllegalStateException e) {
+				System.err.println("ERROR: Could not add to ClientAddQueue due to capacity retrictions!");
+				System.exit(-1);
+			} catch (ClassCastException e) {
+				System.err.println("ERROR: Could not add the class of the specified element to ClientAddQueue!");
+				System.exit(-1);
+			} catch (IllegalArgumentException e) {
+				System.err.println("ERROR: Could not add the specified element to ClientAddQueue!");
+				System.exit(-1);
+			} 
+			return true;
+	}
+
+	// Handles the synchronized remove from the ClientAddQueue
+	public static synchronized MazePacket removeFromClientAddQueue() {
+			Object o = null;
+			try {
+				o = ClientAddQueue.remove();
+			} catch (RuntimeException e) {
+				System.err.println("ERROR: Could not remove from ClientAddQueue!");
+				System.exit(-1);
+			}
+			assert(o instanceof MazePacket);
+			return (MazePacket) o;
+	}
+
+	// Handles the synchronized peek from the ClientAddQueue
+	public static synchronized boolean peekFromClientAddQueue() {
+			Object o = null;
+			try {
+				o = ClientAddQueue.peek();
+			} catch (RuntimeException e) {
+				System.err.println("ERROR: Could not remove from ClientAddQueue!");
+				System.exit(-1);
+			}
+			if (o instanceof MazePacket)
+				return true;
+			return false;
+	}
+
 	// Returns the current SequenceNumber and increments it (not in use right now)
 	public static synchronized int getUniqueSequenceNumber() {
 			int returnNumber = SequenceNumber;
@@ -164,12 +217,16 @@ public class MazeServer {
 	/* Internals ******************************************************/ 
 	// Incoming Queue
 	private static Queue ServerInQueue;
+	// Client Add Queue
+	private static Queue ClientAddQueue;
 	// Sequence Number
 	private static int SequenceNumber;
 	// Number of Clients
 	private static int NumClients;
 	// Set of Clients (public, no need for synchronization) 
 	public static Set<ClientLocation> clientSet;
+	// Number of client the server waits to add until it starts
+	public static int ClientNum = 2;
 	
 	// Turns debug messages on/off
 	private static boolean DEBUG = true;
