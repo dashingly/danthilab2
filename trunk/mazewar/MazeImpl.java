@@ -379,7 +379,9 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
         }
         
         /* Internals */
-        
+        /**
+         * Method for moving the {@link Projectile}s.
+         */
         private synchronized Collection<Object> moveProjectile(Projectile prj) {
                 Collection<Object> deadPrj = new LinkedList<Object>();
                 assert(prj != null);
@@ -418,6 +420,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                 assert(contents instanceof Projectile);
                                 newCell.setContents(null);
                                 cell.setContents(null);
+                                /*
+                                 * Here we were supposed to clean up.
+                                 * Let's check whether we did.
+                                 */
+                                System.out.println("Dead projectile after assert " + newCell.getContents());
                                 deadPrj.add(prj);
                                 deadPrj.add(contents);
                                 update();
