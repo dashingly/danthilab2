@@ -350,11 +350,15 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                                 Object o = it.next();
                                                 assert(o instanceof Projectile);
                                                 deadPrj.addAll(moveProjectile((Projectile)o));
+                                                System.out.println("Active projectile.");
                                         }               
+                                        //TODO: Is this the problem: projectile is moved to the "deadPrj" list but not removed from the "projectileMap"?
                                         it = deadPrj.iterator();
                                         while(it.hasNext()) {
                                                 Object o = it.next();
+                                                System.out.println("Dead projectile.");
                                                 assert(o instanceof Projectile);
+                                                System.out.println("Dead projectile after assert.");
                                                 Projectile prj = (Projectile)o;
                                                 projectileMap.remove(prj);
                                                 clientFired.remove(prj.getOwner());
