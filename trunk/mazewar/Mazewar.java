@@ -159,16 +159,10 @@ public class Mazewar extends JFrame {
                   Mazewar.quit();
                 }
                 
-                // You may want to put your network initialization code somewhere in
-                // here.
-                
                 // Create the GUIClient and connect it to the KeyListener queue
                 guiClient = new GUIClient(name);
-                //This is disabled so that we can enforce the order at which players join the game.
-                //maze.addClient(guiClient);
                 this.addKeyListener(guiClient);
-                
-				
+
 				// TM: Client Listener that connects to network
 				MazeClientHandler networkClientListener = new MazeClientHandler(hostname, port, guiClient, maze);
 				guiClient.addClientListener(networkClientListener);
@@ -182,9 +176,6 @@ public class Mazewar extends JFrame {
 					}
 				}
 				
-				
-				
-                
                 // Use braces to force constructors not to be called at the beginning of the
                 // constructor.
                 /*

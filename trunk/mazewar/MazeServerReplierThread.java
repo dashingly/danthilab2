@@ -72,8 +72,6 @@ public class MazeServerReplierThread extends Thread {
 		while (active) {
 			if(MazeServer.peekFromServerInQueue()) {
 				MazePacket packetToClient = (MazePacket) MazeServer.removeFromServerInQueue();
-				if (DEBUG)
-					System.out.println("SERVER DEBUG: Dequeuing command from the MazeServerQueue issued by " + packetToClient.ClientName);
 				assert (packetToClient != null);
 				// Now that we've retrieved a MazePacket from the ServerInQueue, we can broadcast it to everyone
 				Iterator ossi = outputStreamSet.iterator();
@@ -89,12 +87,6 @@ public class MazeServerReplierThread extends Thread {
 					}
 				}
 			}
-			// Sleep 
-			// try {
-					// sleep(100);
-			// } catch(Exception e) {
-					// Shouldn't happen.
-			// }
 		}
 	}
 

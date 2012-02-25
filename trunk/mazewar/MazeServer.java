@@ -55,6 +55,9 @@ public class MazeServer {
 		// Run the maze server replier thread
 		new MazeServerReplierThread().start();
 		
+		// Run the maze sever projectile update thread
+		new MazeServerUpdateProjectilesThread().start();
+		
 		if (DEBUG)
 				System.out.println("SERVER DEBUG: Server listening");
         
@@ -88,31 +91,37 @@ public class MazeServer {
 			String ClientName = packetFromClient.ClientName;
 			
 			if (DEBUG) {
-				switch (packetFromClient.ce) {
-					case MOVE_FORWARD:
-						System.out.println("SERVER DEBUG: Client " + ClientName + " is moving forward");
-						break;
-					case MOVE_BACKWARD:
-						System.out.println("SERVER DEBUG: Client " + ClientName + " is moving backwards");
-						break;
-					case TURN_LEFT:
-						System.out.println("SERVER DEBUG: Client " + ClientName + " is turning left");
-						break;
-					case TURN_RIGHT:
-						System.out.println("SERVER DEBUG: Client " + ClientName + " is turning right");
-						break;
-					case FIRE:
-						System.out.println("SERVER DEBUG: Client " + ClientName + " is firing");
-						break;
-					default:
-						System.out.println("SERVER DEBUG: Unknown event from client " + ClientName);
+				if (packetFromClient.type == MazePacket.UPDATE_PROJECTILES) {
+					System.out.println("SERVER DEBUG: Projectile update");
+				} else {
+					switch (packetFromClient.ce) {
+						case MOVE_FORWARD:
+							System.out.println("SERVER DEBUG: Client " + ClientName + " is moving forward");
+							break;
+						case MOVE_BACKWARD:
+							System.out.println("SERVER DEBUG: Client " + ClientName + " is moving backwards");
+							break;
+						case TURN_LEFT:
+							System.out.println("SERVER DEBUG: Client " + ClientName + " is turning left");
+							break;
+						case TURN_RIGHT:
+							System.out.println("SERVER DEBUG: Client " + ClientName + " is turning right");
+							break;
+						case FIRE:
+							System.out.println("SERVER DEBUG: Client " + ClientName + " is firing");
+							break;
+						default:
+							System.out.println("SERVER DEBUG: Unknown event from client " + ClientName);
+					}
 				}
 			}
 			
 			try {
 				// Enqueuing command
-				if (DEBUG)
+				if (DEBUG && packetFromClient.type == MazePacket.CLIENT_EVENT)
 					System.out.println("SERVER DEBUG: Enqueuing command into the MazeServerQueue issued by " + packetFromClient.ClientName);
+				if (DEBUG && packetFromClient.type == MazePacket.UPDATE_PROJECTILES)
+					System.out.println("SERVER DEBUG: Enqueuing update projectile command into the MazeServerQueue");
 				ServerInQueue.add(packetFromClient);
 			} catch (IllegalStateException e) {
 				System.err.println("ERROR: Could not add to ServerInQueue due to capacity retrictions!");
@@ -137,7 +146,12 @@ public class MazeServer {
 				System.exit(-1);
 			}
 			assert(o instanceof MazePacket);
-			return (MazePacket) o;
+			MazePacket toClientPacket = (MazePacket) o;
+			if (DEBUG && toClientPacket.type == MazePacket.CLIENT_EVENT)
+				System.out.println("SERVER DEBUG: Dequeuing command into the MazeServerQueue issued by " + toClientPacket.ClientName);
+			if (DEBUG && toClientPacket.type == MazePacket.UPDATE_PROJECTILES)
+				System.out.println("SERVER DEBUG: Dequeuing update projectile command into the MazeServerQueue");
+			return toClientPacket;
 	}
 
 	// Handles the synchronized peek from the ServerInQueue
