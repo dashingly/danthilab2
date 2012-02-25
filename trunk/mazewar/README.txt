@@ -3,6 +3,9 @@ Thierry Moreau 996368746
 Danil Shevelev
 
 Running the Distributed MazeWar:
+	- Execute the make command.
+	- You may have to overwrite the permissions to allow the scripts to run on your machine. Enter the following command to do so:
+		$ chmod u+x *
 	- The game server needs to go online first before the clients can be run. To run the server, type the command:
 		$ ./server.sh <portno> <numclients>
 		ex: ./server.sh 4444 3
