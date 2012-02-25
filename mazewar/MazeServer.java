@@ -28,8 +28,9 @@ public class MazeServer {
         boolean listening = true;
 
         try {
-        	if(args.length == 1) {
+        	if(args.length == 2) {
         		serverSocket = new ServerSocket(Integer.parseInt(args[0]));
+        		ClientNum = Integer.parseInt(args[1]);
         	} else {
         		System.err.println("ERROR: Invalid arguments!");
         		System.exit(-1);
@@ -50,9 +51,6 @@ public class MazeServer {
 		
 		// Initialize the sequence number
 		SequenceNumber = 1;
-		
-		// Initialize the number of clients
-		NumClients = 0;
 		
 		// Run the maze server replier thread
 		new MazeServerReplierThread().start();
@@ -221,12 +219,10 @@ public class MazeServer {
 	private static Queue ClientAddQueue;
 	// Sequence Number
 	private static int SequenceNumber;
-	// Number of Clients
-	private static int NumClients;
 	// Set of Clients (public, no need for synchronization) 
 	public static Set<ClientLocation> clientSet;
 	// Number of client the server waits to add until it starts
-	public static int ClientNum = 2;
+	public static int ClientNum;
 	
 	// Turns debug messages on/off
 	private static boolean DEBUG = true;
