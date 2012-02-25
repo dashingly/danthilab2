@@ -36,4 +36,4 @@ Brief Description of the New Classes:
 		- The MazeClientHandler listens to incoming messages from the MazeServer to make either the GUIClient or one of the RemoteClients perform an action on the Maze.
 
 Errata:
-	For now, there are consistency issues with regards to firing projectiles and their outcomes can be different in different clients.
+	For now exiting the game on one of the clients is not supported
