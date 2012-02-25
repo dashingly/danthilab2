@@ -339,35 +339,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * Control loop for {@link Projectile}s.
          */
         public void run() {
-                Collection<Object> deadPrj = new HashSet<Object>();
                 while(true) {
-                        if(!projectileMap.isEmpty()) {
-                                Iterator it = projectileMap.keySet().iterator();
-                                synchronized(projectileMap) {
-                                	//TODO: Debugging count
-                                	int i = 0;
-                                        while(it.hasNext()) {
-                                        		
-                                                Object o = it.next();
-                                                assert(o instanceof Projectile);
-                                                deadPrj.addAll(moveProjectile((Projectile)o));
-                                                System.out.println("Active projectile " + i);
-                                                i++;
-                                        }               
-                                        //TODO: Is this the problem: projectile is moved to the "deadPrj" list but not removed from the "projectileMap"?
-                                        it = deadPrj.iterator();
-                                        while(it.hasNext()) {
-                                                Object o = it.next();
-                                                System.out.println("Dead projectile.");
-                                                assert(o instanceof Projectile);
-                                                System.out.println("Dead projectile after assert.");
-                                                Projectile prj = (Projectile)o;
-                                                projectileMap.remove(prj);
-                                                clientFired.remove(prj.getOwner());
-                                        }
-                                        deadPrj.clear();
-                                }
-                        }
+                        // sleep
                         try {
                                 thread.sleep(200);
                         } catch(Exception e) {
@@ -375,6 +348,36 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         }
                 }
         }
+		
+		public synchronized void moveAllProjectiles () {
+			if(!projectileMap.isEmpty()) {
+				Iterator it = projectileMap.keySet().iterator();
+				synchronized(projectileMap) {
+					//TODO: Debugging count
+					int i = 0;
+						while(it.hasNext()) {
+								
+								Object o = it.next();
+								assert(o instanceof Projectile);
+								deadPrj.addAll(moveProjectile((Projectile)o));
+								System.out.println("Active projectile " + i);
+								i++;
+						}               
+						//TODO: Is this the problem: projectile is moved to the "deadPrj" list but not removed from the "projectileMap"?
+						it = deadPrj.iterator();
+						while(it.hasNext()) {
+								Object o = it.next();
+								System.out.println("Dead projectile.");
+								assert(o instanceof Projectile);
+								System.out.println("Dead projectile after assert.");
+								Projectile prj = (Projectile)o;
+								projectileMap.remove(prj);
+								clientFired.remove(prj.getOwner());
+						}
+						deadPrj.clear();
+				}
+			}
+		}
         
         /* Internals */
         /**
@@ -617,6 +620,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * The thread used to manage {@link Projectile}s.
          */
         private final Thread thread;
+		
+		/**
+         * The collection of dead {@link Projectile}s.
+         */
+		Collection<Object> deadPrj = new HashSet<Object>();
         
         /**
          * Generate a notification to listeners that a

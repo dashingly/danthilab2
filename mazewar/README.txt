@@ -17,13 +17,15 @@ Brief Description of the New Classes:
 	1) MazeServer:
 		- Implements the MazeServer, that listens to commands from all clients, orders them in a queue, and broadcast the ordered commands to all clients.
 		- It also takes care of the start sequence of the game, making sure that all clients have joined the game in order.
-		- This Class runs a MazeServerHandlerThread thread for each client connected to the server to listen an enqueue commands from these clients, and runs a single MazeserverReplierThread thread that dequeues the commands from the command queue and broadcasts it to all of the clients.
+		- This Class runs a MazeServerHandlerThread thread for each client connected to the server to listen an enqueue commands from these clients, and runs a single MazeserverReplierThread thread that dequeues the commands from the command queue and broadcasts it to all of the clients. It finally runs a MazeServerUpdateProjectiles thread that issues a UpdateProjectile commands to all client that moves all projectiles forward in their local maps.
 	2) MazePacket:
 		Packet format of the packets exchanged between the MazeWar Client and the Server. Contains, client event, client name, and max client info.
 	3) MazeServerHandlerThread:
 		Handles each client, listens to their commands (client events), and enqueues the commands accordingly.
 	4) MazeserverReplierThread: 
 		Dequeues the commands from the command queue, and broadcasts it to all of the clients.
+	5) MazeServerUpdateProjectilesThread:
+		Issues a UpdateProjectile commands to all client every 200ms by enqueing the command in the ServerInQueue. This command type moves all projectiles forward in the client's local maps. This is essential to maintain consistensy between events ordering between all clients since the projectiles used to get updated based on the client's local clocks.
 
 	Client side:
 	1) MazeClientHandler:

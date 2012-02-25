@@ -10,6 +10,7 @@ public class MazePacket implements Serializable {
 	public static final int MAZE_NULL    = 0;
 	public static final int ADD_CLIENT = 101;
 	public static final int CLIENT_EVENT = 102;
+	public static final int UPDATE_PROJECTILES = 103;
 	
 	/* error codes */
 	public static final int ERROR_INVALID_SYMBOL   = -101;
