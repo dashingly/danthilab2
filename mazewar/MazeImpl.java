@@ -354,22 +354,27 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
 				Iterator it = projectileMap.keySet().iterator();
 				synchronized(projectileMap) {
 					//TODO: Debugging count
-					int i = 0;
+					//int i = 0;
 						while(it.hasNext()) {
 								
 								Object o = it.next();
 								assert(o instanceof Projectile);
+								/* 
+								 *	IMPORTANT: the projectile will still exists in the "projectileMap", because it only gets removed in the next while loop.
+                                                 		 */
+                                                		if (deadPrj.contains(o))	continue;
+
 								deadPrj.addAll(moveProjectile((Projectile)o));
-								System.out.println("Active projectile " + i);
-								i++;
+								//System.out.println("Active projectile " + i);
+								//i++;
 						}               
 						//TODO: Is this the problem: projectile is moved to the "deadPrj" list but not removed from the "projectileMap"?
 						it = deadPrj.iterator();
 						while(it.hasNext()) {
 								Object o = it.next();
-								System.out.println("Dead projectile.");
+								//System.out.println("Dead projectile.");
 								assert(o instanceof Projectile);
-								System.out.println("Dead projectile after assert.");
+								//System.out.println("Dead projectile after assert.");
 								Projectile prj = (Projectile)o;
 								projectileMap.remove(prj);
 								clientFired.remove(prj.getOwner());
@@ -427,8 +432,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                  * Here we were supposed to clean up.
                                  * Let's check whether we did.
                                  */
-                                System.out.println("Is it new empty?  " + newCell.getContents() + " is inside");
-                                System.out.println("Is it old empty?   " + cell.getContents() + " is inside");
+                                //System.out.println("Is it new empty?  " + newCell.getContents() + " is inside");
+                                //System.out.println("Is it old empty?   " + cell.getContents() + " is inside");
                                 deadPrj.add(prj);
                                 deadPrj.add(contents);
                                 update();
