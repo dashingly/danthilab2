@@ -37,6 +37,14 @@ Brief Description of the New Classes:
 		- For the following actions: forward(), backward(), turnlelft(), turnright() and fire(), the MazeClientHandler will send a MazePacket to the MazeServer.
 		- The MazeClientHandler also spawns all of the remote clients and stores them based on the start sequence initated by the MazeServer.
 		- The MazeClientHandler listens to incoming messages from the MazeServer to make either the GUIClient or one of the RemoteClients perform an action on the Maze.
+	
+Fix for the bug in the original code:
+
+	1) MazeImpl::run()
+		The thread that handles projectiles allows for dead projectile to be moved forward (after collision), because the iteration set and the 	"projectileMap" are not updated in the first loop. The projectile is only removed in the second while loop. 
+	It is easily fixed by making sure projectile is not in the "deadPrj" collection before doing "deadPrj.addAll(moveProjectile((Projectile)o));" 		instruction. 
+	
 
 Errata:
-	For now exiting the game on one of the clients is not supported
+	At this point we assumed that clients will leave the game at approximately same time. 
+	Therefore we did not implement any client-removal.
