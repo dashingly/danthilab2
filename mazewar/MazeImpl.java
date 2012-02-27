@@ -353,8 +353,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
 			if(!projectileMap.isEmpty()) {
 				Iterator it = projectileMap.keySet().iterator();
 				synchronized(projectileMap) {
-					//TODO: Debugging count
-					//int i = 0;
 						while(it.hasNext()) {
 								
 								Object o = it.next();
@@ -365,16 +363,11 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                                 		if (deadPrj.contains(o))	continue;
 
 								deadPrj.addAll(moveProjectile((Projectile)o));
-								//System.out.println("Active projectile " + i);
-								//i++;
-						}               
-						//TODO: Is this the problem: projectile is moved to the "deadPrj" list but not removed from the "projectileMap"?
+						}
 						it = deadPrj.iterator();
 						while(it.hasNext()) {
 								Object o = it.next();
-								//System.out.println("Dead projectile.");
 								assert(o instanceof Projectile);
-								//System.out.println("Dead projectile after assert.");
 								Projectile prj = (Projectile)o;
 								projectileMap.remove(prj);
 								clientFired.remove(prj.getOwner());
@@ -414,7 +407,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 CellImpl newCell = getCellImpl(newPoint);
                 Object contents = newCell.getContents();
                 if(contents != null) {
-                		//TODO: DEBUGGING
                 	System.out.println("Contents are " + newCell.getContents() + " is inside");
                         // If it is a Client, kill it outright
                         if(contents instanceof Client) {
@@ -432,8 +424,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                                  * Here we were supposed to clean up.
                                  * Let's check whether we did.
                                  */
-                                //System.out.println("Is it new empty?  " + newCell.getContents() + " is inside");
-                                //System.out.println("Is it old empty?   " + cell.getContents() + " is inside");
                                 deadPrj.add(prj);
                                 deadPrj.add(contents);
                                 update();
@@ -458,7 +448,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 assert(client != null);
                 assert(checkBounds(point));
                 CellImpl cell = getCellImpl(point);
-                //TODO
                 System.out.println("Adding client test random." + client.getName());
                 Direction d = Direction.random();
                 while(cell.isWall(d)) {
@@ -496,7 +485,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         point = new Point(randomGen.nextInt(maxX),randomGen.nextInt(maxY));
                         cell = getCellImpl(point);
                 }
-                //TODO
                 System.out.println("Replacing client test random. " + target.getName());
                 Direction d = Direction.random();
                 while(cell.isWall(d)) {

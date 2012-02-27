@@ -14,8 +14,7 @@ public class MazeServerHandlerThread extends Thread {
 		super("MazeServerHandlerThread");
 		assert(socket != null);
 		this.socket = socket;
-		if (DEBUG)
-			System.out.println("SERVER DEBUG: Created new Thread to handle client");
+		System.out.println("Created new Thread to handle client");
 	}
 	
 	public void run() {

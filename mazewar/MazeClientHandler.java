@@ -37,7 +37,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 		assert (clientSocket == null);
 		assert (outStream == null);
 		assert (inStream == null);
-		System.out.println("CLIENT DEBUG: ClientHandler thread running");
+		System.out.println("ClientHandler thread running");
 		
 		// Open the socket, and object streams
 		try {
@@ -81,7 +81,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 				if(( packetFromServer = (MazePacket) inStream.readObject()) != null) {
 					
 					/*
-					 * TODO: Two cases:
+					 * Two cases:
 					 * 1. Client being added 	Check to make sure client is not in the list.
 					 * 2. Client event 			Check to make sure client is in our clientSet.
 					 * 
@@ -110,7 +110,6 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 								if (DEBUG) {
 									System.out.println("CLIENT DEBUG: Server indicates to add the GUI client " + packetFromServer.ClientName);
 								}
-								System.out.println("RELEASED the WAITING lock.");
 							}
 							else
 							{
@@ -122,7 +121,9 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 								}
 							}
 						}
-						System.out.println("CLIENT DEBUG: numClientLogged = " + numClientLogged + ", MaxNumClients = " + MaxNumClients);
+						if (DEBUG) {
+							System.out.println("CLIENT DEBUG: numClientLogged = " + numClientLogged + ", MaxNumClients = " + MaxNumClients);
+						}
 						// If all of the clients are connected, the Maze can launch.
 						if (numClientLogged==MaxNumClients) {
 							maze.waiting = false;
@@ -141,7 +142,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 						}
 						else
 						{
-							System.out.println("ERROR: Client with name " + packetFromServer.ClientName + " is not known on this machine.");
+							System.err.println("ERROR: Client with name " + packetFromServer.ClientName + " is not known on this machine.");
 							continue;
 						}
 						switch (packetFromServer.ce) {
@@ -171,7 +172,8 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 									System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is firing");
 								break;
 							default:
-								System.out.println("CLIENT DEBUG: Unknown event from server " + packetFromServer.ClientName);
+								if(DEBUG) 
+									System.out.println("CLIENT DEBUG: Unknown event from server " + packetFromServer.ClientName);
 						}
 					} else {
 							/* if code comes here, there is an error in the packet */
@@ -193,7 +195,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	
 	// Function that handles the GUIclient's updates
 	/*
-	 * TODO: Seems to me it runs under GUI-thread and not MazeClientHandler-thread.
+	 * Seems to me it runs under GUI-thread and not MazeClientHandler-thread.
 	 */
 	public void clientUpdate(Client c, ClientEvent ce) {
 			if (DEBUG) {

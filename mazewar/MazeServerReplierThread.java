@@ -13,8 +13,7 @@ public class MazeServerReplierThread extends Thread {
 	public MazeServerReplierThread() {
 		super("MazeServerReplierThread");
 		active = true;
-		if (DEBUG)
-			System.out.println("SERVER DEBUG: Created new Thread to broadcast to all clients");
+		System.out.println("Created new Thread to broadcast to all clients");
 	}
 	
 	public void run() {
