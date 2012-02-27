@@ -97,7 +97,6 @@ public class Direction {
         public static Direction random() 
         {
         	int num = randomGen.nextInt(4);
-        	System.out.println("Pseudo random direction is " + num);
                 switch(num) {
                         case NORTH:
                                 return South;

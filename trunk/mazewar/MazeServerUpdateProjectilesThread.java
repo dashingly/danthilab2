@@ -11,8 +11,7 @@ public class MazeServerUpdateProjectilesThread extends Thread {
 	
 	public MazeServerUpdateProjectilesThread() {
 		super("s");
-		if (DEBUG)
-			System.out.println("SERVER DEBUG: Created new Thread to generate updateProjectiles events");
+		System.out.println("Created new Thread to generate updateProjectiles events");
 	}
 	
 	public void run() {

@@ -116,7 +116,7 @@ public class Mazewar extends JFrame {
                 // (inform other implementations on the network that you have 
                 //  left, etc.)
                 /*
-                 * TODO: Need to send out a message to server saying we want out.
+                 * FIXME: Need to send out a message to server saying we want out.
                  */
         	
 
