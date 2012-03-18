@@ -118,11 +118,9 @@ public class Mazewar extends JFrame {
                 /*
                  * FIXME: Need to send out a message to server saying we want out.
                  */
-        	
 
                 System.exit(0);
         }
-        
         
        
         /** 
@@ -132,15 +130,26 @@ public class Mazewar extends JFrame {
                 super("ECE419 Mazewar");
                 consolePrintLn("ECE419 Mazewar started!");
 				
-				// TM: Read in the arguments: hostname and port
-				String hostname = "ug160.eecg.utoronto.ca";
-				int port = 4444;
-				if(args.length == 2 ) {
-					hostname = args[0];
-					port = Integer.parseInt(args[1]);
+				// TM: Read in the arguments to connect to the naming service: hostname and port
+				String NS_hostname = "ug160.eecg.utoronto.ca";
+				String my_hostname = "ug160.eecg.utoronto.ca";
+				int NS_port = 4444;
+				int my_port = 4444;
+				if(args.length == 3 ) {
+					NS_hostname = args[0];
+					NS_port = Integer.parseInt(args[1]);
+					my_port = Integer.parseInt(args[2]);
 				} else {
 					System.err.println("ERROR: Invalid arguments!");
 					System.exit(-1);
+				}
+				// Obtain client hostname
+				try {
+					InetAddress my_addr = InetAddress.getLocalHost();
+					my_hostname = my_addr.getHostName();
+				} catch (IOException e) {
+					System.err.println("ERROR: Couldn't get the client's local host.");
+					System.exit(1);
 				}
                 
                 // Create the maze
@@ -164,7 +173,7 @@ public class Mazewar extends JFrame {
                 this.addKeyListener(guiClient);
 
 				// TM: Client Listener that connects to network
-				MazeClientHandler networkClientListener = new MazeClientHandler(hostname, port, guiClient, maze);
+				MazeClientHandler networkClientListener = new MazeClientHandler(NS_hostname, NS_port, my_hostname, my_port, guiClient, maze);
 				guiClient.addClientListener(networkClientListener);
 				
 				// Spin while we did not add the GUIclient after server approved order.
