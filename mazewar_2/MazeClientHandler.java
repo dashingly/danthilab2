@@ -15,9 +15,11 @@ import java.net.*;
 public class MazeClientHandler implements Serializable, ClientListener, Runnable{
 	
 	// Constructor
-	public MazeClientHandler(String hostname, int port, GUIClient client, MazeImpl mazeStr) {
-		this.hostname = hostname;
-		this.port = port;
+	public MazeClientHandler(String NS_hostname, int NS_port, String my_hostname, int my_port, GUIClient client, MazeImpl mazeStr) {
+		this.NS_hostname = NS_hostname;
+		this.NS_port = NS_port;
+		this.my_hostname = my_hostname;
+		this.my_port = my_port;
 		// Add the ClientEcho object as a reference
 		assert(client != null);
 		this.theGUIClient = client;
@@ -33,62 +35,107 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	}
 	
 	public void run() {
+		// Counter taking track of number of clients logged
+		int numClientLogged = 0;
+		
 		// Ensure that no socket is currently open
-		assert (clientSocket == null);
-		assert (outStream == null);
-		assert (inStream == null);
+		assert (NS_Socket == null);
+		assert (NS_out == null);
+		assert (NS_in == null);
 		System.out.println("ClientHandler thread running");
 		
-		// Open the socket, and object streams
+		// 1 - Register to the naming service
 		try {
 			// Open socket
-			clientSocket = new Socket(hostname, port);
-			
+			NS_Socket = new Socket(NS_hostname, NS_port);
 			// Open output stream
-			outStream = new ObjectOutputStream(clientSocket.getOutputStream());
-			// Create an addClient message for the Server
-			MazePacket packetToServer = new MazePacket();
-			packetToServer.type = MazePacket.ADD_CLIENT;
-			packetToServer.ClientName = theGUIClient.getName();
-			// Send out the add_client message
-			outStream.writeObject(packetToServer);
-			
+			NS_out = new ObjectOutputStream(NS_Socket.getOutputStream());
+			// Create an NS_REGISTER message for the Server
+			MazePacket packetToNamingService = new MazePacket();
+			ClientIP my_location[] = new ClientIP[1];
+			my_location[0] = new ClientIP(theGUIClient.getName(), my_hostname ,my_port);
+			packetToNamingService.type = MazePacket.NS_REGISTER;
+			packetToNamingService.ClientName = theGUIClient.getName();
+			packetToNamingService.locations = my_location;
+			// Send out the NS_REGISTER message
+			NS_out.writeObject(packetToNamingService);
 		} catch (UnknownHostException e) {
 			System.out.println(e.getMessage());
 			System.err.println("ERROR: Don't know where to connect!!");
 			System.exit(1);
 		} catch (IOException e) {
-			System.out.println("CLIENT DEBUG: Server hostname: " + hostname);
-			System.out.println("CLIENT DEBUG: Server port: " + port);
+			System.out.println("CLIENT DEBUG: Nameservice hostname: " + NS_hostname);
+			System.out.println("CLIENT DEBUG: Nameservice port: " + NS_port);
 			System.out.println(e.getMessage());
 			System.err.println("ERROR: Couldn't get I/O for the connection.");
 			System.exit(1);
 		}
 		
+		// 2 - Listen to the naming service reply
 		try {
 			// Open input stream
-			inStream = new ObjectInputStream(clientSocket.getInputStream());
-			// Packet received from the Server
-			MazePacket packetFromServer;
+			NS_in = new ObjectInputStream(NS_Socket.getInputStream());
+			// Packet received from the Name Service
+			MazePacket packetFromNaming = (MazePacket) NS_in.readObject();
+			// Process the packet
+			assert (packetFromNaming.type == MazePacket.NS_REPLY);
+			for (ClientIP item : packetFromNaming.locations) {
+				clientLocationSet.put(item.client_name, item);
+				if(DEBUG) {
+					System.out.println ("[CLIENT DEBUG] Successfully registered client " + item.client_name + " - IP: " + item.client_host + " " + item.client_port);
+				}
+				numClientLogged ++;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+		// 3 - Listen to additional joins from other clients
+		try {
+			MazePacket addPacketFromNaming;
+			while (( addPacketFromNaming = (MazePacket) NS_in.readObject()) != null) {
+				if (addPacketFromNaming.type == MazePacket.NS_ADD) {
+					if (addPacketFromNaming.locations[0].client_name.compareTo(theGUIClient.getName())==0) {
+						if(DEBUG) {
+							System.out.println ("[CLIENT DEBUG] Received add command from local client, ignore.");
+						}
+					}
+					else {
+						if(DEBUG) {
+							System.out.println ("[CLIENT DEBUG] Successfully added client " + addPacketFromNaming.locations[0].client_name + " - IP: " + addPacketFromNaming.locations[0].client_host + " " + addPacketFromNaming.locations[0].client_port);
+							
+							System.out.println ("[CLIENT DEBUG] " + addPacketFromNaming.locations[0].client_name + " " + theGUIClient.getName());
+						}
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		
+		
+		/*
+		try {
 			//Client to address
 			Client curClient; 
-			// Maximum number of clients
-			int MaxNumClients = 1000;
-			// Conter taking track of number of clients logged
-			int numClientLogged = 0;
 			
 			while (active) {
 				if(( packetFromServer = (MazePacket) inStream.readObject()) != null) {
 					
-					/*
-					 * Two cases:
-					 * 1. Client being added 	Check to make sure client is not in the list.
-					 * 2. Client event 			Check to make sure client is in our clientSet.
-					 * 
-					 * There is a problem with adding clients:
-					 * 		Given seeds solves all problems, except for initialization of clients - they have to initialize in the same order, 
-					 * 		otherwise they will be mapped to the same location.
-					 */
+					//
+					// Two cases:
+					// 1. Client being added 	Check to make sure client is not in the list.
+					// 2. Client event 			Check to make sure client is in our clientSet.
+					// 
+					// There is a problem with adding clients:
+					// 		Given seeds solves all problems, except for initialization of clients - they have to initialize in the same order, 
+					// 		otherwise they will be mapped to the same location.
+					//
 					if (packetFromServer.type == MazePacket.ADD_CLIENT) {
 						// Set the client limit set by the server
 						MaxNumClients = packetFromServer.MaxNumClient;
@@ -176,21 +223,23 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 									System.out.println("CLIENT DEBUG: Unknown event from server " + packetFromServer.ClientName);
 						}
 					} else {
-							/* if code comes here, there is an error in the packet */
+							// if code comes here, there is an error in the packet
 							System.err.println("ERROR: Unknown packet!!");
 							System.exit(-1);
 					}
 				}
 			}
-			/* cleanup when client exits */
-			outStream.close();
-			inStream.close();
-			clientSocket.close();
+			
+			// cleanup when client exits 
+			NS_out.close();
+			NS_in.close();
+			NS_Socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		*/
 	}
 	
 	// Function that handles the GUIclient's updates
@@ -204,15 +253,15 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			// Assert that the client we are listening is indeed theGUIClient
 			assert (c == theGUIClient);
 			// Make sure that we are connected to the server
-			assert(outStream != null);
+			assert(NS_out != null);
 			// Create an clientEvent message for the Server
-			MazePacket packetToServer = new MazePacket();
+			MazePacket packetToNamingService = new MazePacket();
 			// Set the header
-			if (ce.getEvent()== ADD)			packetToServer.type = MazePacket.ADD_CLIENT;
-			else								packetToServer.type = MazePacket.CLIENT_EVENT;
+			if (ce.getEvent()== ADD)			packetToNamingService.type = MazePacket.ADD_CLIENT;
+			else								packetToNamingService.type = MazePacket.CLIENT_EVENT;
 			
-			packetToServer.ClientName = theGUIClient.getName();
-			packetToServer.ce = ce.getEvent();
+			packetToNamingService.ClientName = theGUIClient.getName();
+			packetToNamingService.ce = ce.getEvent();
 			// Debug printouts
 			if (DEBUG) {
 				switch (ce.getEvent()) {
@@ -238,7 +287,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			}
 			// Send out the add_client message
 			try {
-				outStream.writeObject(packetToServer);
+				NS_out.writeObject(packetToNamingService);
 			} catch (IOException e) {
 				System.err.println("ERROR: Couldn't send the CLIENT_EVENT message.");
 				System.exit(1);
@@ -248,13 +297,16 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 
 
 	/* Internals ******************************************************/    
-	// Server Info
-	private static String hostname = null;
-	private static int port = 0;
+	// NameService Info
+	private static String NS_hostname = null;
+	private static int NS_port = 0;
+	// Local Client Info
+	private static String my_hostname = null;
+	private static int my_port = 0;
 	// Networking
-	private static Socket clientSocket = null;
-	private static ObjectOutputStream outStream = null;
-	private static ObjectInputStream inStream = null;
+	private static Socket NS_Socket = null;
+	private static ObjectOutputStream NS_out = null;
+	private static ObjectInputStream NS_in = null;
 	
 	// Reference to the GUIClient we are listening to
 	private GUIClient theGUIClient = null;
@@ -265,6 +317,10 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	
 	// Set of remote clients
 	public final Map<String, Client> clientSet = new HashMap<String, Client>();
+	
+	// Set of remote client locations
+	public final Map<String, ClientIP> clientLocationSet = new HashMap<String, ClientIP>();
+	
 	
 	// Thread
 	private final Thread thread;
