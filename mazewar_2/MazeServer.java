@@ -91,9 +91,7 @@ public class MazeServer {
 			String ClientName = packetFromClient.ClientName;
 			
 			if (DEBUG) {
-				if (packetFromClient.type == MazePacket.UPDATE_PROJECTILES) {
-					System.out.println("SERVER DEBUG: Projectile update");
-				} else {
+				
 					switch (packetFromClient.ce) {
 						case MOVE_FORWARD:
 							System.out.println("SERVER DEBUG: Client " + ClientName + " is moving forward");

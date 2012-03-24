@@ -31,7 +31,7 @@ public class MazePacket implements Serializable {
 	public static final int MAZE_NULL    = 0;
 	public static final int ADD_CLIENT = 101;
 	public static final int CLIENT_EVENT = 102;
-	public static final int UPDATE_PROJECTILES = 103;
+	//public static final int UPDATE_PROJECTILES = 103;
 	
 	/* for the naming service */
 	public static final int NS_REGISTER = 201;
@@ -40,6 +40,8 @@ public class MazePacket implements Serializable {
 	
 	/* error codes */
 	public static final int ERROR_INVALID_SYMBOL   = -101;
+	public static final int GET_SEQs 	= 777;
+	public static final int SEQs 		= 778;
 	
 	/* message header */
 	public int type = MazePacket.MAZE_NULL;
@@ -58,6 +60,9 @@ public class MazePacket implements Serializable {
 	
 	/* client locations */
 	public ClientIP locations[];
+	
+	/* Sequence number from ticketing service */
+	public int seqs;
 	
 	
 }

@@ -91,6 +91,7 @@ public class MazeNamingServiceHandlerThread extends Thread{
 					packetToBroadcast.locations = packetFromClient.locations;
 					
 					// 6 - Broadcast
+					// TODO: We do not need to broadcast if every new client gets list of existing clients because it can establish connection with them. 
 					Iterator ossi = outputStreamSet.iterator();
 					while (ossi.hasNext()) {
 						Object o = ossi.next();
