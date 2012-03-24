@@ -112,14 +112,13 @@ public class MazeServer {
 							System.out.println("SERVER DEBUG: Unknown event from client " + ClientName);
 					}
 				}
-			}
+			
 			
 			try {
 				// Enqueuing command
 				if (DEBUG && packetFromClient.type == MazePacket.CLIENT_EVENT)
 					System.out.println("SERVER DEBUG: Enqueuing command into the MazeServerQueue issued by " + packetFromClient.ClientName);
-				if (DEBUG && packetFromClient.type == MazePacket.UPDATE_PROJECTILES)
-					System.out.println("SERVER DEBUG: Enqueuing update projectile command into the MazeServerQueue");
+				
 				ServerInQueue.add(packetFromClient);
 			} catch (IllegalStateException e) {
 				System.err.println("ERROR: Could not add to ServerInQueue due to capacity retrictions!");
@@ -147,8 +146,7 @@ public class MazeServer {
 			MazePacket toClientPacket = (MazePacket) o;
 			if (DEBUG && toClientPacket.type == MazePacket.CLIENT_EVENT)
 				System.out.println("SERVER DEBUG: Dequeuing command into the MazeServerQueue issued by " + toClientPacket.ClientName);
-			if (DEBUG && toClientPacket.type == MazePacket.UPDATE_PROJECTILES)
-				System.out.println("SERVER DEBUG: Dequeuing update projectile command into the MazeServerQueue");
+			
 			return toClientPacket;
 	}
 

@@ -339,8 +339,55 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * Control loop for {@link Projectile}s.
          */
         public void run() {
+                Collection<Object> deadPrj = new HashSet<Object>();
                 while(true) {
-                        // sleep
+                        if(!projectileMap.isEmpty()) {
+                                Iterator it = projectileMap.keySet().iterator();
+                                
+                                //TODO: Dumping the maze:
+                                //this.print();
+                                synchronized(projectileMap) {
+                                	synchronized(mazeVector) {	
+                                	//TODO: Debugging count
+                                	int i = 0;
+                                	//This is the problem - iterator does not get updated even if the projectileMap has no more items
+                                        while(it.hasNext()) {
+                                        		
+                                                Object o = it.next();
+                                                assert(o instanceof Projectile);
+                                                /*
+                                                 * We need to make sure "o" is not dead, aka does not exist in the "deadP". If so - "continue".
+                                                 * IMPORTANT: the projectile will still exists in the "projectileMap", because it only gets removed in the next while loop.
+                                                 */
+                                                if (deadPrj.contains(o))	continue;
+                                                                                                
+                                                deadPrj.addAll(moveProjectile((Projectile)o));
+                                                
+                                                i++;
+                                                
+                                        }               
+                                        //TODO: Is this the problem: projectile is moved to the "deadPrj" list but not removed from the "projectileMap"?
+                                      //TODO: Dumping the maze:
+                                        //System.out.println("MIDDLE");
+                                        //this.print();
+                                        
+                                        it = deadPrj.iterator();
+                                        while(it.hasNext()) {
+                                                Object o = it.next();
+                                                //System.out.println("Dead projectile.");
+                                                assert(o instanceof Projectile);
+                                                //System.out.println("Dead projectile after assert.");
+                                                Projectile prj = (Projectile)o;
+                                                projectileMap.remove(prj);
+                                                clientFired.remove(prj.getOwner());
+                                                //System.out.println("Do we get HERE at least?");
+                                        }
+                                        deadPrj.clear();
+                                }
+                                }
+                              //TODO: Dumping the maze:
+                                //this.print();
+                        }
                         try {
                                 thread.sleep(200);
                         } catch(Exception e) {
@@ -348,34 +395,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         }
                 }
         }
-		
-		public synchronized void moveAllProjectiles () {
-			if(!projectileMap.isEmpty()) {
-				Iterator it = projectileMap.keySet().iterator();
-				synchronized(projectileMap) {
-						while(it.hasNext()) {
-								
-								Object o = it.next();
-								assert(o instanceof Projectile);
-								/* 
-								 *	IMPORTANT: the projectile will still exists in the "projectileMap", because it only gets removed in the next while loop.
-                                                 		 */
-                                                		if (deadPrj.contains(o))	continue;
-
-								deadPrj.addAll(moveProjectile((Projectile)o));
-						}
-						it = deadPrj.iterator();
-						while(it.hasNext()) {
-								Object o = it.next();
-								assert(o instanceof Projectile);
-								Projectile prj = (Projectile)o;
-								projectileMap.remove(prj);
-								clientFired.remove(prj.getOwner());
-						}
-						deadPrj.clear();
-				}
-			}
-		}
         
         /* Internals */
         /**
@@ -407,7 +426,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 CellImpl newCell = getCellImpl(newPoint);
                 Object contents = newCell.getContents();
                 if(contents != null) {
-                	System.out.println("Contents are " + newCell.getContents() + " is inside");
+                		//TODO: DEBUGGING
+                	//System.out.println("Contents are " + newCell.getContents() + " is inside");
                         // If it is a Client, kill it outright
                         if(contents instanceof Client) {
                                 killClient(prj.getOwner(), (Client)contents);
@@ -439,6 +459,58 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 update();
                 return deadPrj;
         }
+
+        /**
+         * Method for moving the {@link Projectile}s.
+         * @return 
+         */
+        private synchronized void clearProjectile(Projectile prj) {
+        	Collection<Object> deadPrj = new LinkedList<Object>();
+        	assert(prj != null);
+
+        	Object o = projectileMap.get(prj);
+        	assert(o instanceof DirectedPoint);
+        	DirectedPoint dp = (DirectedPoint)o;
+        	Direction d = dp.getDirection();
+        	CellImpl cell = getCellImpl(dp);
+
+
+
+        	DirectedPoint newPoint = new DirectedPoint(dp.move(d), d);
+        	/* Is the point within the bounds of maze? */
+        			assert(checkBounds(newPoint));
+
+        	CellImpl newCell = getCellImpl(newPoint);
+        	Object contents = newCell.getContents();
+        	if(contents != null) {
+
+        		assert(contents instanceof Projectile);
+        		newCell.setContents(null);
+        		cell.setContents(null);
+        		/*
+        		 * Here we were supposed to clean up.
+        		 * Let's check whether we did.
+        		 */
+        		//System.out.println("Is it new empty?  " + newCell.getContents() + " is inside");
+        		//System.out.println("Is it old empty?   " + cell.getContents() + " is inside");
+        		//TODO: Dumping the maze:
+        		//System.out.println("     INSIDE");
+        		//this.print();
+        		deadPrj.add(prj);
+        		deadPrj.add(contents);
+        		update();
+
+        	}
+
+        	/* Clear the old cell */
+        	cell.setContents(null);
+        	/* Write the new cell */
+        	projectileMap.put(prj, newPoint);
+        	newCell.setContents(prj);
+        	update();
+
+        }
+        
         /**
          * Internal helper for adding a {@link Client} to the {@link Maze}.
          * @param client The {@link Client} to be added.
@@ -448,7 +520,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 assert(client != null);
                 assert(checkBounds(point));
                 CellImpl cell = getCellImpl(point);
-                System.out.println("Adding client test random." + client.getName());
+                //TODO
+                //System.out.println("Adding client test random." + client.getName());
                 Direction d = Direction.random();
                 while(cell.isWall(d)) {
                   d = Direction.random();
@@ -485,7 +558,8 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                         point = new Point(randomGen.nextInt(maxX),randomGen.nextInt(maxY));
                         cell = getCellImpl(point);
                 }
-                System.out.println("Replacing client test random. " + target.getName());
+                //TODO
+                //System.out.println("Replacing client test random. " + target.getName());
                 Direction d = Direction.random();
                 while(cell.isWall(d)) {
                         d = Direction.random();
@@ -613,11 +687,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * The thread used to manage {@link Projectile}s.
          */
         private final Thread thread;
-		
-		/**
-         * The collection of dead {@link Projectile}s.
-         */
-		Collection<Object> deadPrj = new HashSet<Object>();
         
         /**
          * Generate a notification to listeners that a
