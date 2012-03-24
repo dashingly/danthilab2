@@ -178,9 +178,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 								System.out.println("CLIENT DEBUG: The Mazewar game can start!");
 							}
 						}
-					} else if (packetFromServer.type == MazePacket.UPDATE_PROJECTILES) {
-						// Update all projectiles on the map
-						maze.moveAllProjectiles();
+					
 					} else if (packetFromServer.type == MazePacket.CLIENT_EVENT) {
 						// Make sure client exists locally and obtain the client
 						if (this.clientSet.containsKey(packetFromServer.ClientName))
