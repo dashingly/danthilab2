@@ -1,0 +1,14 @@
+The plan is
+	On the client side:
+Thread0: GUI
+Thread1: MazeImpl/Projectile
+Thread2: For every local action, we get a ticket and insert event into the global queue.
+Thread3: Will initialize all the connections, starting with naming server. Monitor global queue. Use a "current" event counter and wait for appropiate slot to be filled in. Can use hash-map for the queue, since we will be using SEQ#.
+Thread4-N: Will be used for connection with all the other clients. Once event is received it is inserted into queue/hash-map using SEQ#.
+
+How do we initialize game? We have to keep client adds in order.
+We can connect to clients once we get the list from the server, but not add them to the map.
+Once initiation is done and ticketing service is started each client will send out an add with appropriate SEQ#.
+
+	On the server side:
+We start naming service and then ticketing service.
