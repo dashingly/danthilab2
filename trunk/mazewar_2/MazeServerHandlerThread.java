@@ -3,6 +3,19 @@ import java.io.*;
 import java.util.*;
 import java.lang.Thread;
 
+
+/* inline class to describe client */
+class ClientLocation implements Serializable {
+	public Socket socket;
+	public String name;
+	
+	/* constructor */
+	public ClientLocation (Socket socket, String name) {
+		this.socket = socket;
+		this.name = name;
+	}
+}
+
 // This Class listens to each client connected to the MazeServer
 // and processes each message by enqueuing it
 public class MazeServerHandlerThread extends Thread {

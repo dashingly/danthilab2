@@ -426,8 +426,6 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 CellImpl newCell = getCellImpl(newPoint);
                 Object contents = newCell.getContents();
                 if(contents != null) {
-                		//TODO: DEBUGGING
-                	//System.out.println("Contents are " + newCell.getContents() + " is inside");
                         // If it is a Client, kill it outright
                         if(contents instanceof Client) {
                                 killClient(prj.getOwner(), (Client)contents);

@@ -1,8 +1,5 @@
-// File: ClientEcho.java
+// File: MazeClientHandler.java
 // Author: TM
-
-// Currently dummy class to echo events locally from client to maze
-// This way, we can easily extend this entity accross different machines
 
 // Just copied and pasted the import list from MazeImpl.java
 import java.lang.Thread;
@@ -11,8 +8,19 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 
+/* inline class to describe client */
+class ClientConnection implements Serializable {
+	public Socket socket;
+	public String name;
+	
+	/* constructor */
+	public ClientConnection (Socket socket, String name) {
+		this.socket = socket;
+		this.name = name;
+	}
+}
 
-public class MazeClientHandler implements Serializable, ClientListener, Runnable{
+public class MazeClientHandler implements Serializable, ClientListener, Runnable {
 	
 	// Constructor
 	public MazeClientHandler(String NS_hostname, int NS_port, String my_hostname, int my_port, GUIClient client, MazeImpl mazeStr) {
@@ -20,7 +28,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 		this.NS_port = NS_port;
 		this.my_hostname = my_hostname;
 		this.my_port = my_port;
-		// Add the ClientEcho object as a reference
+		// Add the client object as a reference
 		assert(client != null);
 		this.theGUIClient = client;
 		assert(selfName != null);
@@ -35,8 +43,9 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	}
 	
 	public void run() {
-		// Counter taking track of number of clients logged
-		int numClientLogged = 0;
+		
+		// Intialize the set of clients
+		clientConnectionSet = new HashSet<ClientConnection>();
 		
 		// Ensure that no socket is currently open
 		assert (NS_Socket == null);
@@ -80,11 +89,15 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			// Process the packet
 			assert (packetFromNaming.type == MazePacket.NS_REPLY);
 			for (ClientIP item : packetFromNaming.locations) {
-				clientLocationSet.put(item.client_name, item);
+				if (item.client_name.compareTo(theGUIClient.getName())==0) {
+					// Do nothing - do not add yourself
+				} else {
+					// Add the client
+					addClient(item);
+				}
 				if(DEBUG) {
 					System.out.println ("[CLIENT DEBUG] Successfully registered client " + item.client_name + " - IP: " + item.client_host + " " + item.client_port);
 				}
-				numClientLogged ++;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -103,10 +116,10 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 						}
 					}
 					else {
+						// Add the client
+						addClient(addPacketFromNaming.locations[0]);
 						if(DEBUG) {
 							System.out.println ("[CLIENT DEBUG] Successfully added client " + addPacketFromNaming.locations[0].client_name + " - IP: " + addPacketFromNaming.locations[0].client_host + " " + addPacketFromNaming.locations[0].client_port);
-							
-							System.out.println ("[CLIENT DEBUG] " + addPacketFromNaming.locations[0].client_name + " " + theGUIClient.getName());
 						}
 					}
 				}
@@ -240,6 +253,24 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 		*/
 	}
 	
+	// Adds the client to the clientSet
+	private void addClient(ClientIP clientIP) {
+			assert(clientIP != null);
+			// Add the ClientIP object to our clientLocationSet
+			clientLocationSet.put(clientIP.client_name, clientIP);
+			// Open socket
+			Socket RemoteClient_Socket = null;
+			try {
+				RemoteClient_Socket = new Socket(clientIP.client_host, clientIP.client_port);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			// Create the ClientConnection object
+			ClientConnection clientConnection = new ClientConnection(RemoteClient_Socket, clientIP.client_name);
+			clientConnectionSet.add(clientConnection);
+			numClientLogged ++;
+	}
+	
 	// Function that handles the GUIclient's updates
 	/*
 	 * Seems to me it runs under GUI-thread and not MazeClientHandler-thread.
@@ -318,6 +349,12 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	
 	// Set of remote client locations
 	public final Map<String, ClientIP> clientLocationSet = new HashMap<String, ClientIP>();
+	
+	// Set of remote client connections
+	public static Set<ClientConnection> clientConnectionSet;
+	
+	// Counter taking track of number of clients logged
+	int numClientLogged = 0;
 	
 	
 	// Thread

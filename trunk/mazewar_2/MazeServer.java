@@ -5,18 +5,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.LinkedList;
- 
-/* inline class to describe client */
-class ClientLocation implements Serializable {
-	public Socket socket;
-	public String name;
-	
-	/* constructor */
-	public ClientLocation (Socket socket, String name) {
-		this.socket = socket;
-		this.name = name;
-	}
-}
+
 
 public class MazeServer {
 
@@ -54,9 +43,6 @@ public class MazeServer {
 		
 		// Run the maze server replier thread
 		new MazeServerReplierThread().start();
-		
-		// Run the maze sever projectile update thread
-		new MazeServerUpdateProjectilesThread().start();
 		
 		if (DEBUG)
 				System.out.println("SERVER DEBUG: Server listening");
