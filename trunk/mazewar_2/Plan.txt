@@ -1,10 +1,24 @@
 The plan is
 	On the client side:
-Thread0: GUI
-Thread1: MazeImpl/Projectile
-Thread2: For every local action, we get a ticket and insert event into the global queue.
-Thread3: Will initialize all the connections, starting with naming server. Monitor global queue. Use a "current" event counter and wait for appropiate slot to be filled in. Can use hash-map for the queue, since we will be using SEQ#.
-Thread4-N: Will be used for connection with all the other clients. Once event is received it is inserted into queue/hash-map using SEQ#.
+Thread0:MazeWar GUI
+Thread1:MazeImpl Projectile control.
+Thread2:MazeClientListener
+	For every local action:
+	1. We get a ticket.
+	2. We insert event into the outgoing queue.
+	3. We insert event into the ingoing queue.
+	*It needs to have access to outgoing queue(s).
+Thread3:MazeManager
+	Stage1:
+		Will initialize all the connections, starting with naming server. It receives list of clients and establishes connection to them. It spons one RemoteContact thread per connection. 
+	Stage2:
+		Monitor global queue. Use a "current" event counter and wait for appropiate slot to be filled in. Can use hash-map for the queue, since we will be using SEQ#.
+Thread4-N:RemoteContact
+	Will be used for connection with all the other clients. 
+	Outgoing connection:
+		Send out events in the outgoing queue. Need a method to ensure all the RemoteContact threads send out an event before (if) it gets cleared from the queue.
+	Incomming connection:
+		Check incomming connection for events, insert them into queue/hash-map using SEQ#.
 
 How do we initialize game? We have to keep client adds in order.
 We can connect to clients once we get the list from the server, but not add them to the map.
