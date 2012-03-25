@@ -31,10 +31,16 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 		// Add the client object as a reference
 		assert(client != null);
 		this.theGUIClient = client;
-		assert(selfName != null);
-		
 		// Set the reference to the maze
 		this.maze = mazeStr;
+		
+		// Intialize the set of clients socket connections
+		clientConnectionSet = new HashSet<ClientConnection>();
+		// Intialize the set of clients socket connections
+		outputStreamSet = new HashSet<ObjectOutputStream>();
+		
+		// New thread that listens to incoming connections from other clients
+		MazeClientListener remoteClientListener = new MazeClientListener(my_hostname, my_port, this);
 		
 		// Start the MazeClientHandler
 		thread = new Thread(this);
@@ -43,9 +49,6 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	}
 	
 	public void run() {
-		
-		// Intialize the set of clients
-		clientConnectionSet = new HashSet<ClientConnection>();
 		
 		// Ensure that no socket is currently open
 		assert (NS_Socket == null);
@@ -73,14 +76,14 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			System.err.println("ERROR: Don't know where to connect!!");
 			System.exit(1);
 		} catch (IOException e) {
-			System.out.println("CLIENT DEBUG: Nameservice hostname: " + NS_hostname);
-			System.out.println("CLIENT DEBUG: Nameservice port: " + NS_port);
+			System.out.println("[CLIENT DEBUG] Nameservice hostname: " + NS_hostname);
+			System.out.println("[CLIENT DEBUG] Nameservice port: " + NS_port);
 			System.out.println(e.getMessage());
 			System.err.println("ERROR: Couldn't get I/O for the connection.");
 			System.exit(1);
 		}
 		
-		// 2 - Listen to the naming service reply
+		// 2 - Listen to the naming service reply - add all of the existing clients to the local maze
 		try {
 			// Open input stream
 			NS_in = new ObjectInputStream(NS_Socket.getInputStream());
@@ -93,16 +96,27 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 					// Do nothing - do not add yourself
 				} else {
 					// Add the client
-					addClient(item);
-				}
-				if(DEBUG) {
-					System.out.println ("[CLIENT DEBUG] Successfully registered client " + item.client_name + " - IP: " + item.client_host + " " + item.client_port);
+					try {
+						addClient(item);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					if(DEBUG) {
+						System.out.println ("[CLIENT DEBUG] Successfully registered and added client " + item.client_name + " - IP: " + item.client_host + " " + item.client_port);
+					}
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+		}
+		
+		// 3 - Add the GUIclient to the maze (note the ordering - we want to add ourselves once we've added the other players)
+		clientSet.put(theGUIClient.getName(), theGUIClient);
+		maze.addClient(theGUIClient);
+		if (DEBUG) {
+			System.out.println("[CLIENT DEBUG] Successfully added client " + theGUIClient.getName());
 		}
 		
 		// 3 - Listen to additional joins from other clients
@@ -117,7 +131,11 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 					}
 					else {
 						// Add the client
-						addClient(addPacketFromNaming.locations[0]);
+						try {
+							addClient(addPacketFromNaming.locations[0]);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 						if(DEBUG) {
 							System.out.println ("[CLIENT DEBUG] Successfully added client " + addPacketFromNaming.locations[0].client_name + " - IP: " + addPacketFromNaming.locations[0].client_host + " " + addPacketFromNaming.locations[0].client_port);
 						}
@@ -130,196 +148,142 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			e.printStackTrace();
 		}
 
-		
-		
-		/*
 		try {
-			//Client to address
-			Client curClient; 
-			
-			while (active) {
-				if(( packetFromServer = (MazePacket) inStream.readObject()) != null) {
-					
-					//
-					// Two cases:
-					// 1. Client being added 	Check to make sure client is not in the list.
-					// 2. Client event 			Check to make sure client is in our clientSet.
-					// 
-					// There is a problem with adding clients:
-					// 		Given seeds solves all problems, except for initialization of clients - they have to initialize in the same order, 
-					// 		otherwise they will be mapped to the same location.
-					//
-					if (packetFromServer.type == MazePacket.ADD_CLIENT) {
-						// Set the client limit set by the server
-						MaxNumClients = packetFromServer.MaxNumClient;
-						// Incement the number of clients logged
-						numClientLogged ++;
-						// The client set is contained withing this class: check if it isn't a duplicate
-						if (this.clientSet.containsKey(packetFromServer.ClientName))
-						{
-							System.out.println("ERROR: Client with name " + packetFromServer.ClientName + " already exists locally.");
-							continue;
-						}
-						else
-						{
-							//Check if this is a local client we are adding
-							if ((packetFromServer.ClientName).equals(theGUIClient.getName()))
-							{
-								clientSet.put(theGUIClient.getName(), theGUIClient);
-								maze.addClient(theGUIClient);
-								if (DEBUG) {
-									System.out.println("CLIENT DEBUG: Server indicates to add the GUI client " + packetFromServer.ClientName);
-								}
-							}
-							else
-							{
-								RemoteClient remClient = new RemoteClient(packetFromServer.ClientName);
-								clientSet.put(remClient.getName(), remClient);
-								maze.addClient(remClient);
-								if (DEBUG) {
-									System.out.println("CLIENT DEBUG: Server indicates to add new remote client " + packetFromServer.ClientName);
-								}
-							}
-						}
-						if (DEBUG) {
-							System.out.println("CLIENT DEBUG: numClientLogged = " + numClientLogged + ", MaxNumClients = " + MaxNumClients);
-						}
-						// If all of the clients are connected, the Maze can launch.
-						if (numClientLogged==MaxNumClients) {
-							maze.waiting = false;
-							if (DEBUG) {
-								System.out.println("CLIENT DEBUG: The Mazewar game can start!");
-							}
-						}
-					
-					} else if (packetFromServer.type == MazePacket.CLIENT_EVENT) {
-						// Make sure client exists locally and obtain the client
-						if (this.clientSet.containsKey(packetFromServer.ClientName))
-						{
-							curClient = this.clientSet.get(packetFromServer.ClientName);
-						}
-						else
-						{
-							System.err.println("ERROR: Client with name " + packetFromServer.ClientName + " is not known on this machine.");
-							continue;
-						}
-						switch (packetFromServer.ce) {
-							case MOVE_FORWARD:
-								maze.moveClientForward(curClient);
-								if(DEBUG) 
-									System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is moving forward");
-								break;
-							case MOVE_BACKWARD:
-								maze.moveClientBackward(curClient);
-								if(DEBUG) 
-									System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is moving backwards");
-								break;
-							case TURN_LEFT:
-								maze.rotateClientLeft(curClient);
-								if(DEBUG) 
-									System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is turning left");
-								break;
-							case TURN_RIGHT:
-								maze.rotateClientRight(curClient);
-								if(DEBUG) 
-									System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is turning right");
-								break;
-							case FIRE:
-								maze.clientFire(curClient);
-								if(DEBUG) 
-									System.out.println("CLIENT DEBUG: Server indicates client " + packetFromServer.ClientName + " is firing");
-								break;
-							default:
-								if(DEBUG) 
-									System.out.println("CLIENT DEBUG: Unknown event from server " + packetFromServer.ClientName);
-						}
-					} else {
-							// if code comes here, there is an error in the packet
-							System.err.println("ERROR: Unknown packet!!");
-							System.exit(-1);
-					}
-				}
-			}
-			
 			// cleanup when client exits 
 			NS_out.close();
 			NS_in.close();
 			NS_Socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 		}
-		*/
+
 	}
 	
 	// Adds the client to the clientSet
-	private void addClient(ClientIP clientIP) {
+	private void addClient(ClientIP clientIP) throws IOException{
 			assert(clientIP != null);
 			// Add the ClientIP object to our clientLocationSet
 			clientLocationSet.put(clientIP.client_name, clientIP);
-			// Open socket
+			// Open socket, output stream
 			Socket RemoteClient_Socket = null;
-			try {
-				RemoteClient_Socket = new Socket(clientIP.client_host, clientIP.client_port);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			RemoteClient_Socket = new Socket(clientIP.client_host, clientIP.client_port);
+			ObjectOutputStream toClient = new ObjectOutputStream(RemoteClient_Socket.getOutputStream());
+			outputStreamSet.add(toClient);
 			// Create the ClientConnection object
 			ClientConnection clientConnection = new ClientConnection(RemoteClient_Socket, clientIP.client_name);
 			clientConnectionSet.add(clientConnection);
+			// Add the remote client to the Maze
+			RemoteClient remClient = new RemoteClient(clientIP.client_name);
+			clientSet.put(remClient.getName(), remClient);
+			maze.addClient(remClient);
+			if (DEBUG) {
+				System.out.println("[CLIENT DEBUG] Client " + clientIP.client_name + " was added to the game");
+			}
 			numClientLogged ++;
 	}
 	
+	// Broadcasts to all remote clients
+	private void broadcastToClients(MazePacket packetBroadcast) throws IOException {
+			assert(packetBroadcast != null);
+			// Broadcast it to everyone
+			Iterator ossi = outputStreamSet.iterator();
+			while (ossi.hasNext()) {
+				Object o = ossi.next();
+				assert(o instanceof ObjectOutputStream);
+				ObjectOutputStream toClient = (ObjectOutputStream)o;
+				try {
+					/* stream to read from client */
+					toClient.writeObject(packetBroadcast);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+	}
+	
 	// Function that handles the GUIclient's updates
-	/*
-	 * Seems to me it runs under GUI-thread and not MazeClientHandler-thread.
-	 */
 	public void clientUpdate(Client c, ClientEvent ce) {
 			if (DEBUG) {
-				System.out.println("CLIENT DEBUG: MazeClientHandler Listener notified");
+				System.out.println("[CLIENT DEBUG] MazeClientHandler Listener notified");
 			}
 			// Assert that the client we are listening is indeed theGUIClient
 			assert (c == theGUIClient);
-			// Make sure that we are connected to the server
-			assert(NS_out != null);
-			// Create an clientEvent message for the Server
-			MazePacket packetToNamingService = new MazePacket();
-			// Set the header
-			if (ce.getEvent()== ADD)			packetToNamingService.type = MazePacket.ADD_CLIENT;
-			else								packetToNamingService.type = MazePacket.CLIENT_EVENT;
-			
-			packetToNamingService.ClientName = theGUIClient.getName();
-			packetToNamingService.ce = ce.getEvent();
-			// Debug printouts
-			if (DEBUG) {
+			// Make sure there is at least one connection
+			if (numClientLogged>0) {
+				assert (NS_out != null);
+				// Create an clientEvent message for the Server
+				MazePacket packetBroadcast = new MazePacket();
+				// Set the header
+				packetBroadcast.type = MazePacket.CLIENT_EVENT;
+				packetBroadcast.ClientName = theGUIClient.getName();
+				packetBroadcast.ce = ce.getEvent();
+				// Debug printouts
+				if (DEBUG) {
+					switch (ce.getEvent()) {
+						case MOVE_FORWARD:
+							System.out.println("[CLIENT DEBUG] GUI client moves forward.");
+							break;
+						case MOVE_BACKWARD:
+							System.out.println("[CLIENT DEBUG] GUI client moves backward.");
+							break;
+						case TURN_LEFT:
+							System.out.println("[CLIENT DEBUG] GUI client turns left.");
+							break;
+						case TURN_RIGHT:
+							System.out.println("[CLIENT DEBUG] GUI client turns right.");
+							break;
+						case FIRE:
+							System.out.println("[CLIENT DEBUG] GUI client fires.");
+							break;
+						case ADD:
+							System.out.println("[CLIENT DEBUG] GUI client is being added.");
+							break;
+					}
+				}
+				// Send out the add_client message
+				try {
+					broadcastToClients(packetBroadcast);
+				} catch (IOException e) {
+					System.err.println("ERROR: Couldn't send the CLIENT_EVENT message.");
+					System.exit(1);
+				}
+				//
+				//
+				// !!!FIXME: DANIL please read!!!
+				// Right now, each move from the GUIclient updates the maze direclty, but we need to ensure that the 
+				// local moves get only executed once the sequence number that the GUI client gets is next
+				//
+				//
+				Client curClient = clientSet.get(theGUIClient.getName());
 				switch (ce.getEvent()) {
 					case MOVE_FORWARD:
-						System.out.println("CLIENT DEBUG: GUI client moves forward.");
+						this.maze.moveClientForward(curClient);
+						if(DEBUG) 
+							System.out.println("[CLIENT DEBUG] GUI client " + theGUIClient.getName() + " is moving forward");
 						break;
 					case MOVE_BACKWARD:
-						System.out.println("CLIENT DEBUG: GUI client moves backward.");
+						this.maze.moveClientBackward(curClient);
+						if(DEBUG) 
+							System.out.println("[CLIENT DEBUG] GUI client " + theGUIClient.getName() + " is moving backwards");
 						break;
 					case TURN_LEFT:
-						System.out.println("CLIENT DEBUG: GUI client turns left.");
+						this.maze.rotateClientLeft(curClient);
+						if(DEBUG) 
+							System.out.println("[CLIENT DEBUG] GUI client " + theGUIClient.getName() + " is turning left");
 						break;
 					case TURN_RIGHT:
-						System.out.println("CLIENT DEBUG: GUI client turns right.");
+						this.maze.rotateClientRight(curClient);
+						if(DEBUG) 
+							System.out.println("[CLIENT DEBUG] GUI client " + theGUIClient.getName() + " is turning right");
 						break;
 					case FIRE:
-						System.out.println("CLIENT DEBUG: GUI client fires.");
+						this.maze.clientFire(curClient);
+						if(DEBUG) 
+							System.out.println("[CLIENT DEBUG] GUI client " + theGUIClient.getName() + " is firing");
 						break;
-					case ADD:
-						System.out.println("CLIENT DEBUG: GUI client is being added.");
-						break;
+					default:
+						if(DEBUG) 
+							System.out.println("[CLIENT DEBUG] Unknown event from GUI client " + theGUIClient.getName());
 				}
-			}
-			// Send out the add_client message
-			try {
-				NS_out.writeObject(packetToNamingService);
-			} catch (IOException e) {
-				System.err.println("ERROR: Couldn't send the CLIENT_EVENT message.");
-				System.exit(1);
 			}
 	}
 
@@ -338,21 +302,18 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	private static ObjectInputStream NS_in = null;
 	
 	// Reference to the GUIClient we are listening to
-	private GUIClient theGUIClient = null;
+	public static GUIClient theGUIClient = null;
 	// Reference to the maze with all the clients.
-	private static MazeImpl maze;
-	private String selfName;
-	
+	public static MazeImpl maze;
 	
 	// Set of remote clients
 	public final Map<String, Client> clientSet = new HashMap<String, Client>();
-	
 	// Set of remote client locations
 	public final Map<String, ClientIP> clientLocationSet = new HashMap<String, ClientIP>();
-	
-	// Set of remote client connections
-	public static Set<ClientConnection> clientConnectionSet;
-	
+	// Set of remote client socket connections
+	public Set<ClientConnection> clientConnectionSet;
+	// Set of outputStream
+	Set outputStreamSet;
 	// Counter taking track of number of clients logged
 	int numClientLogged = 0;
 	

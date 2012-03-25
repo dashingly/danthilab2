@@ -11,11 +11,12 @@ import java.net.*;
 // Listens to other client connections
 public class MazeClientListener implements Runnable {
 
-	public MazeClientListener(String my_hostname, int my_port) {
+	public MazeClientListener(String my_hostname, int my_port, MazeClientHandler clientHandler) {
 		this.my_hostname = my_hostname;
 		this.my_port = my_port;
+		this.clientHandler = clientHandler;
 		
-		System.out.println("Created new MazeClientListenerThread to listen to incoming client connections");
+		System.out.println("Created new MazeClientListener in instance to listen to incoming client connections");
 		
 		// Start the MazeClientListener
 		thread = new Thread(this);
@@ -37,11 +38,11 @@ public class MazeClientListener implements Runnable {
 		boolean listening = true;
 		
 		if (DEBUG)
-				System.out.println("CLIENT DEBUG: Client " + my_hostname + " listening");
+				System.out.println("[CLIENT DEBUG] Client " + my_hostname + " listening");
 		
 		try {
 			while (listening) {
-				new MazeServerHandlerThread(listeningSocket.accept()).start();
+				new MazeClientListenerThread(listeningSocket.accept()).start();
 			}
 			listeningSocket.close();
 		} catch (IOException e) {
@@ -59,5 +60,7 @@ public class MazeClientListener implements Runnable {
 	private final Thread thread;
 	// Turns debug messages on/off
 	private static boolean DEBUG = true;
-
+	
+	// Reference to the clientHandler (to access the clientSet, and the maze)
+	public static MazeClientHandler clientHandler;
 }
