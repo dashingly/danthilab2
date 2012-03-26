@@ -42,6 +42,12 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 		// New thread that listens to incoming connections from other clients
 		MazeClientListener remoteClientListener = new MazeClientListener(my_hostname, my_port, this);
 		
+		// At this point ticketing service will be running on same host as NS, but on the port # = (NS_port+1)
+		this.TS_port = NS_port+1;
+		
+		//Initialize the queue
+		incomingQ = new HashMap<Integer, MazePacket>();
+		
 		// Start the MazeClientHandler
 		thread = new Thread(this);
 		active = true;
@@ -55,6 +61,21 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 		assert (NS_out == null);
 		assert (NS_in == null);
 		System.out.println("ClientHandler thread running");
+		
+		// 0 - Initialize connection to TS
+		System.out.println("[MazeClientHandler] Going to connect to TS.");
+		/* TODO: Establish connection to the Ticketing Service */
+		try {
+			tickets = new Socket(NS_hostname, TS_port);
+			TS_out 	= new ObjectOutputStream(tickets.getOutputStream());
+			TS_in 	= new ObjectInputStream(tickets.getInputStream());
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		// 1 - Register to the naming service
 		try {
@@ -156,7 +177,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+		
 	}
 	
 	// Adds the client to the clientSet
@@ -208,14 +229,53 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			// Assert that the client we are listening is indeed theGUIClient
 			assert (c == theGUIClient);
 			// Make sure there is at least one connection
-			if (numClientLogged>0) {
+			//if (numClientLogged>0) 
+			{
 				assert (NS_out != null);
+				
+				/* TODO: Get the SEQ# from TicketingService */
+				// Send request
+				MazePacket ticketRequest = new MazePacket();
+				ticketRequest.type = MazePacket.GET_SEQs;
+				ticketRequest.ClientName = theGUIClient.getName();
+				try {
+					TS_out.writeObject(ticketRequest);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				// Get the SEQ#
+				MazePacket ticketP = null;
+				try {
+					ticketP = (MazePacket) TS_in.readObject();
+					assert(ticketP.type == MazePacket.SEQs);
+					assert(ticketP.seqs != 0);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				System.out.println("Got the SEQ# " + ticketP.seqs);
+				
+				
+							
+				
 				// Create an clientEvent message for the Server
 				MazePacket packetBroadcast = new MazePacket();
 				// Set the header
 				packetBroadcast.type = MazePacket.CLIENT_EVENT;
 				packetBroadcast.ClientName = theGUIClient.getName();
 				packetBroadcast.ce = ce.getEvent();
+				/* Set the sequence number on the outgoing packet*/
+				packetBroadcast.seqs = ticketP.seqs;
+				
+				/* Add local event to the incoming queue */
+				MazeClientListener.add2q(packetBroadcast.seqs, packetBroadcast);
+				
 				// Debug printouts
 				if (DEBUG) {
 					switch (ce.getEvent()) {
@@ -253,6 +313,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 				// local moves get only executed once the sequence number that the GUI client gets is next
 				//
 				//
+				/* this will be done within MazeClientListener - it will be maintaining incomming queue
 				Client curClient = clientSet.get(theGUIClient.getName());
 				switch (ce.getEvent()) {
 					case MOVE_FORWARD:
@@ -284,7 +345,18 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 						if(DEBUG) 
 							System.out.println("[CLIENT DEBUG] Unknown event from GUI client " + theGUIClient.getName());
 				}
+				*/
 			}
+	}
+
+
+
+	public static void setIncomingQ(HashMap<Integer,MazePacket> incomingQ) {
+		MazeClientHandler.incomingQ = incomingQ;
+	}
+
+	public static HashMap<Integer,MazePacket> getIncomingQ() {
+		return incomingQ;
 	}
 
 
@@ -333,6 +405,19 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	private static final int TURN_RIGHT 	= 3;
 	private static final int FIRE 			= 4;
 	private static final int ADD 			= 7;
+	
+	/* Queue */
+	/*
+	 *  We can use HashMap as incoming queue. All we have to do is use SEQ# as identifier.
+	 *  Making it public for other threads to see. 
+	 */
+	public static HashMap<Integer,MazePacket> incomingQ;
+	
+	/* Socket for the Ticketing Service */
+	private static Socket tickets				= null;
+	private static ObjectOutputStream 	TS_out 	= null;
+	private static ObjectInputStream 	TS_in 	= null;
+	private static int 					TS_port = 0;
 	
 
 }

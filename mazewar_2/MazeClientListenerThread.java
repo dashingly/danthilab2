@@ -34,36 +34,10 @@ public class MazeClientListenerThread extends Thread {
 						System.err.println("ERROR: Client with name " + packetFromClient.ClientName + " is not known on this machine.");
 						continue;
 					}
-					switch (packetFromClient.ce) {
-						case MOVE_FORWARD:
-							MazeClientListener.clientHandler.maze.moveClientForward(curClient);
-							if(DEBUG) 
-								System.out.println("[CLIENT DEBUG] Server indicates client " + packetFromClient.ClientName + " is moving forward");
-							break;
-						case MOVE_BACKWARD:
-							MazeClientListener.clientHandler.maze.moveClientBackward(curClient);
-							if(DEBUG) 
-								System.out.println("[CLIENT DEBUG] Server indicates client " + packetFromClient.ClientName + " is moving backwards");
-							break;
-						case TURN_LEFT:
-							MazeClientListener.clientHandler.maze.rotateClientLeft(curClient);
-							if(DEBUG) 
-								System.out.println("[CLIENT DEBUG] Server indicates client " + packetFromClient.ClientName + " is turning left");
-							break;
-						case TURN_RIGHT:
-							MazeClientListener.clientHandler.maze.rotateClientRight(curClient);
-							if(DEBUG) 
-								System.out.println("[CLIENT DEBUG] Server indicates client " + packetFromClient.ClientName + " is turning right");
-							break;
-						case FIRE:
-							MazeClientListener.clientHandler.maze.clientFire(curClient);
-							if(DEBUG) 
-								System.out.println("[CLIENT DEBUG] Server indicates client " + packetFromClient.ClientName + " is firing");
-							break;
-						default:
-							if(DEBUG) 
-								System.out.println("[CLIENT DEBUG] Unknown event from server " + packetFromClient.ClientName);
-					}
+					/* Instead of executing commands, just queue them.	*/
+					MazeClientListener.add2q(packetFromClient.seqs, packetFromClient);
+					
+					
 				} else {
 						// if code comes here, there is an error in the packet
 						System.err.println("ERROR: Unknown packet!!");
@@ -93,12 +67,7 @@ public class MazeClientListenerThread extends Thread {
 	public final Map<String, Client> clientSet = new HashMap<String, Client>();
 	
 	
-	// Need to copy those locally: the clientevent class protects those
-	private static final int MOVE_FORWARD 	= 0;
-	private static final int MOVE_BACKWARD 	= 1;
-	private static final int TURN_LEFT 		= 2;
-	private static final int TURN_RIGHT 	= 3;
-	private static final int FIRE 			= 4;
-	private static final int ADD 			= 7;
+	
+
 	
 }

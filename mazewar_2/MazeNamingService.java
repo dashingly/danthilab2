@@ -2,7 +2,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
-public class MazeNamingService {
+public class MazeNamingService  {
 
 	/**
 	 * @param args
@@ -10,10 +10,13 @@ public class MazeNamingService {
 	public static void main(String[] args) throws IOException{
 		ServerSocket serverSocket = null;
 		boolean listening = true;
+		
+		
 
         try {
         	if(args.length == 1) {
-        		serverSocket = new ServerSocket(Integer.parseInt(args[0]));
+        		NS_port = Integer.parseInt(args[0]);
+        		serverSocket = new ServerSocket(NS_port);
         	} else {
         		System.err.println("ERROR: Invalid arguments!");
         		System.exit(-1);
@@ -29,5 +32,7 @@ public class MazeNamingService {
 
         serverSocket.close();
 	}
+	
+	public static int NS_port = 0;
 
 }
