@@ -50,6 +50,71 @@ public class MazeClientListener implements Runnable {
 		}
 
 	}
+	
+	public static synchronized void add2q(int seq, MazePacket pack)
+	{
+		/* First add the packet */
+		/*
+		HashMap<Integer,MazePacket> temp;
+		temp = MazeClientHandler.getIncomingQ();
+		temp.put(seq, pack);
+		MazeClientHandler.setIncomingQ(temp);
+		*/
+		MazeClientHandler.incomingQ.put(seq, pack);
+		
+		System.out.println("[CLIENT LISTENER] Current event is " + currentEvent);
+		
+		/* Check if we can dequeue something */
+		while (MazeClientHandler.getIncomingQ().containsKey(currentEvent))
+		{
+			// Dequeue
+			MazePacket p = MazeClientHandler.getIncomingQ().get(seq);
+			Client curClient = MazeClientListener.clientHandler.clientSet.get(p.ClientName);
+			
+			
+			switch (p.ce) {
+			case MOVE_FORWARD:
+				MazeClientHandler.maze.moveClientForward(curClient);
+				if(DEBUG) 
+					System.out.println("[CLIENT DEBUG] Server indicates client " + p.ClientName + " is moving forward");
+				break;
+			case MOVE_BACKWARD:
+				MazeClientHandler.maze.moveClientBackward(curClient);
+				if(DEBUG) 
+					System.out.println("[CLIENT DEBUG] Server indicates client " + p.ClientName + " is moving backwards");
+				break;
+			case TURN_LEFT:
+				MazeClientHandler.maze.rotateClientLeft(curClient);
+				if(DEBUG) 
+					System.out.println("[CLIENT DEBUG] Server indicates client " + p.ClientName + " is turning left");
+				break;
+			case TURN_RIGHT:
+				MazeClientHandler.maze.rotateClientRight(curClient);
+				if(DEBUG) 
+					System.out.println("[CLIENT DEBUG] Server indicates client " + p.ClientName + " is turning right");
+				break;
+			case FIRE:
+				MazeClientHandler.maze.clientFire(curClient);
+				if(DEBUG) 
+					System.out.println("[CLIENT DEBUG] Server indicates client " + p.ClientName + " is firing");
+				break;
+			default:
+				if(DEBUG) 
+					System.out.println("[CLIENT DEBUG] Unknown event from server " + p.ClientName);
+			}
+			// Increment counter
+			//increment();
+			currentEvent++;
+			System.out.println("[CLIENT LISTENER] Current event is " + currentEvent);
+		}
+	}
+	
+	public static synchronized void increment()
+	{
+		currentEvent++;
+	}
+	
+	
 
 	
 	/* Internals ******************************************************/    
@@ -63,4 +128,15 @@ public class MazeClientListener implements Runnable {
 	
 	// Reference to the clientHandler (to access the clientSet, and the maze)
 	public static MazeClientHandler clientHandler;
+	
+	// Counter to keep track of the position within incoming queue
+	private static int currentEvent = 1;
+	
+	// Need to copy those locally: the ClientEvent class protects those
+	private static final int MOVE_FORWARD 	= 0;
+	private static final int MOVE_BACKWARD 	= 1;
+	private static final int TURN_LEFT 		= 2;
+	private static final int TURN_RIGHT 	= 3;
+	private static final int FIRE 			= 4;
+	private static final int ADD 			= 7;
 }

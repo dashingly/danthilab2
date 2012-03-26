@@ -22,13 +22,15 @@ public class TicketServiceThread extends Thread{
 		this.ip_lookup = ip_lookup;
 		
 		if (DEBUG) {
-			System.out.println("[NAME_SERVICE DEBUG] Created new thread to handle client");
+			System.out.println("[TICKET SERVICE DEBUG] Created new thread to handle client");
 		}
 	}
 	
 	public void run() {
 
 		boolean gotByePacket = false;
+		
+		System.out.println("[TICKET SERVER] Got one client.");
 		
 		try {
 			// Stream to read from client
@@ -44,7 +46,7 @@ public class TicketServiceThread extends Thread{
 			while((packetFromClient = (MazePacket) fromClient.readObject()) != null) {
 				/* NS_REGISTER */
 				if(packetFromClient.type == MazePacket.GET_SEQs) {
-					
+					System.out.println("[TICKET SERVER] Got a ticket request.");
 					
 					// 4 - Send the reply message for the client
 					MazePacket packetToClient = new MazePacket();
