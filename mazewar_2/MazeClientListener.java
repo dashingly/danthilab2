@@ -16,6 +16,9 @@ public class MazeClientListener implements Runnable {
 		this.my_port = my_port;
 		this.clientHandler = clientHandler;
 		
+		//Initialize the queue
+		incomingQ = new Hashtable<Integer, MazePacket>();
+		
 		System.out.println("Created new MazeClientListener in instance to listen to incoming client connections");
 		
 		// Start the MazeClientListener
@@ -60,15 +63,15 @@ public class MazeClientListener implements Runnable {
 		temp.put(seq, pack);
 		MazeClientHandler.setIncomingQ(temp);
 		*/
-		MazeClientHandler.incomingQ.put(seq, pack);
+		incomingQ.put(seq, pack);
 		
-		System.out.println("[CLIENT LISTENER] Current event is " + currentEvent);
+		System.out.println("[CLIENT LISTENER] Current event before while is " + currentEvent);
 		
 		/* Check if we can dequeue something */
-		while (MazeClientHandler.getIncomingQ().containsKey(currentEvent))
+		while (incomingQ.containsKey(currentEvent))
 		{
 			// Dequeue
-			MazePacket p = MazeClientHandler.getIncomingQ().get(seq);
+			MazePacket p = incomingQ.get(currentEvent);
 			Client curClient = MazeClientListener.clientHandler.clientSet.get(p.ClientName);
 			
 			
@@ -102,9 +105,11 @@ public class MazeClientListener implements Runnable {
 				if(DEBUG) 
 					System.out.println("[CLIENT DEBUG] Unknown event from server " + p.ClientName);
 			}
+			// Remove current event from the queue
+			incomingQ.remove(currentEvent);
 			// Increment counter
-			//increment();
-			currentEvent++;
+			increment();
+			//currentEvent++;
 			System.out.println("[CLIENT LISTENER] Current event is " + currentEvent);
 		}
 	}
@@ -131,6 +136,13 @@ public class MazeClientListener implements Runnable {
 	
 	// Counter to keep track of the position within incoming queue
 	private static int currentEvent = 1;
+	
+	/* Queue */
+	/*
+	 *  We can use HashMap as incoming queue. All we have to do is use SEQ# as identifier.
+	 *  Making it public for other threads to see. 
+	 */
+	public static Hashtable<Integer,MazePacket> incomingQ;
 	
 	// Need to copy those locally: the ClientEvent class protects those
 	private static final int MOVE_FORWARD 	= 0;
