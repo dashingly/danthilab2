@@ -57,12 +57,7 @@ public class MazeClientListener implements Runnable {
 	public static synchronized void add2q(int seq, MazePacket pack)
 	{
 		/* First add the packet */
-		/*
-		HashMap<Integer,MazePacket> temp;
-		temp = MazeClientHandler.getIncomingQ();
-		temp.put(seq, pack);
-		MazeClientHandler.setIncomingQ(temp);
-		*/
+		
 		incomingQ.put(seq, pack);
 		
 		System.out.println("[CLIENT LISTENER] Current event before while is " + currentEvent);
@@ -108,8 +103,8 @@ public class MazeClientListener implements Runnable {
 			// Remove current event from the queue
 			incomingQ.remove(currentEvent);
 			// Increment counter
-			increment();
-			//currentEvent++;
+			//increment();
+			currentEvent++;
 			System.out.println("[CLIENT LISTENER] Current event is " + currentEvent);
 		}
 	}
@@ -117,6 +112,11 @@ public class MazeClientListener implements Runnable {
 	public static synchronized void increment()
 	{
 		currentEvent++;
+	}
+	
+	public static synchronized int getcur()
+	{
+		return currentEvent;
 	}
 	
 	
@@ -129,7 +129,7 @@ public class MazeClientListener implements Runnable {
 	// Thread
 	private final Thread thread;
 	// Turns debug messages on/off
-	private static boolean DEBUG = true;
+	private static boolean DEBUG = false;
 	
 	// Reference to the clientHandler (to access the clientSet, and the maze)
 	public static MazeClientHandler clientHandler;
@@ -142,7 +142,7 @@ public class MazeClientListener implements Runnable {
 	 *  We can use HashMap as incoming queue. All we have to do is use SEQ# as identifier.
 	 *  Making it public for other threads to see. 
 	 */
-	public static Hashtable<Integer,MazePacket> incomingQ;
+	private static Hashtable<Integer,MazePacket> incomingQ;
 	
 	// Need to copy those locally: the ClientEvent class protects those
 	private static final int MOVE_FORWARD 	= 0;

@@ -135,7 +135,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			System.out.println("[CLIENT DEBUG] Successfully added client " + theGUIClient.getName());
 		}
 		
-		// 3 - Listen to additional joins from other clients
+		// 4 - Listen to additional joins from other clients
 		try {
 			MazePacket addPacketFromNaming;
 			while (( addPacketFromNaming = (MazePacket) NS_in.readObject()) != null) {
@@ -306,6 +306,8 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	}
 
 
+
+
 	/* Internals ******************************************************/    
 	// NameService Info
 	private static String NS_hostname = null;
@@ -350,7 +352,6 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	private static final int TURN_RIGHT 	= 3;
 	private static final int FIRE 			= 4;
 	private static final int ADD 			= 7;
-	
 
 	
 	/* Socket for the Ticketing Service */
