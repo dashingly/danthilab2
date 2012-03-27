@@ -2,53 +2,51 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
-public class TicketService{
+public class TicketService implements Runnable{
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) throws IOException{
+	public TicketService(int nSPort) 
+	{
+		// TODO Auto-generated constructor stub
+		TS_port = nSPort + 1;
+		
+		// Start the Ticket Service
+		thread = new Thread(this);
+		
+		thread.start();
+	}
+
+	// Sequence Number
+	private static int 	SequenceNumber = 0;
+	private static int 	TS_port = 0;
+	private final 		Thread thread;
+	
+	// This is simple synchronized (critical section) counter.
+	public static synchronized int getSeqs()
+	{
+		SequenceNumber++;
+		return SequenceNumber;
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
 		ServerSocket serverSocket = null;
 		boolean listening = true;
 
-		System.out.println("[Ticket Service] Up and Running");
+		System.out.println("[TICKET SERVICE] Up and Running");
 		
         try {
-        	if(args.length == 1) {
-        		serverSocket = new ServerSocket(Integer.parseInt(args[0]));
+        	if(TS_port > 0) {
+        		serverSocket = new ServerSocket(TS_port);
         	} else {
-        		System.err.println("ERROR: Invalid arguments!");
+        		System.err.println("[TICKET SERVICE] ERROR: Invalid port!");
         		System.exit(-1);
         	}
         } catch (IOException e) {
-            System.err.println("ERROR: Could not listen on port!");
+            System.err.println("[TICKET SERVICE] ERROR: Could not listen on port!");
             System.exit(-1);
         }
         SequenceNumber = 0;
-        
-        while (listening) {
-        	new TicketServiceThread(serverSocket.accept()).start();
-        }
-
-        serverSocket.close();
-	}
-	/*
-	
-	public static void main(String[] args) throws IOException{
-		ServerSocket serverSocket = null;
-		boolean listening = true;
-
-        try {
-        	TS_port = MazeNamingService.NS_port;
-        	serverSocket = new ServerSocket();
-        	
-        } catch (IOException e) {
-            System.err.println("ERROR: Could not listen on port!");
-            System.exit(-1);
-        }
-        SequenceNumber = 0;
-        
-        System.out.println("[TICKET SERVER] Up and running.");
         
         while (listening) {
         	try {
@@ -65,19 +63,6 @@ public class TicketService{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	*/
-	
-	// Sequence Number
-	private static int SequenceNumber = 0;
-	
-	private static int TS_port = 0;
-	
-	// This is simple synchronized (critical section) counter.
-	public static synchronized int getSeqs()
-	{
-		SequenceNumber++;
-		return SequenceNumber;
 	}
 
 }

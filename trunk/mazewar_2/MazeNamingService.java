@@ -26,6 +26,9 @@ public class MazeNamingService  {
             System.exit(-1);
         }
         
+        /* Spawn Ticketing service */
+        TicketService tik = new TicketService(NS_port);
+        
         while (listening) {
         	new MazeNamingServiceHandlerThread(serverSocket.accept()).start();
         }

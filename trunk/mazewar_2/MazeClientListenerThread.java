@@ -59,7 +59,7 @@ public class MazeClientListenerThread extends Thread {
 	
 	/* Internals ******************************************************/   
 	// Turns debug messages on/off
-	private static boolean DEBUG = true;
+	private static boolean DEBUG = false;
 	// Socket connected to other client
 	private Socket socket = null;
 
