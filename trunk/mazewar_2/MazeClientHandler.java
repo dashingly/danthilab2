@@ -45,8 +45,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 		// At this point ticketing service will be running on same host as NS, but on the port # = (NS_port+1)
 		this.TS_port = NS_port+1;
 		
-		//Initialize the queue
-		incomingQ = new HashMap<Integer, MazePacket>();
+		
 		
 		// Start the MazeClientHandler
 		thread = new Thread(this);
@@ -306,59 +305,9 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 					System.err.println("ERROR: Couldn't send the CLIENT_EVENT message.");
 					System.exit(1);
 				}
-				//
-				//
-				// !!!FIXME: DANIL please read!!!
-				// Right now, each move from the GUIclient updates the maze direclty, but we need to ensure that the 
-				// local moves get only executed once the sequence number that the GUI client gets is next
-				//
-				//
-				/* this will be done within MazeClientListener - it will be maintaining incomming queue
-				Client curClient = clientSet.get(theGUIClient.getName());
-				switch (ce.getEvent()) {
-					case MOVE_FORWARD:
-						this.maze.moveClientForward(curClient);
-						if(DEBUG) 
-							System.out.println("[CLIENT DEBUG] GUI client " + theGUIClient.getName() + " is moving forward");
-						break;
-					case MOVE_BACKWARD:
-						this.maze.moveClientBackward(curClient);
-						if(DEBUG) 
-							System.out.println("[CLIENT DEBUG] GUI client " + theGUIClient.getName() + " is moving backwards");
-						break;
-					case TURN_LEFT:
-						this.maze.rotateClientLeft(curClient);
-						if(DEBUG) 
-							System.out.println("[CLIENT DEBUG] GUI client " + theGUIClient.getName() + " is turning left");
-						break;
-					case TURN_RIGHT:
-						this.maze.rotateClientRight(curClient);
-						if(DEBUG) 
-							System.out.println("[CLIENT DEBUG] GUI client " + theGUIClient.getName() + " is turning right");
-						break;
-					case FIRE:
-						this.maze.clientFire(curClient);
-						if(DEBUG) 
-							System.out.println("[CLIENT DEBUG] GUI client " + theGUIClient.getName() + " is firing");
-						break;
-					default:
-						if(DEBUG) 
-							System.out.println("[CLIENT DEBUG] Unknown event from GUI client " + theGUIClient.getName());
-				}
-				*/
+				
 			}
 	}
-
-
-
-	public static void setIncomingQ(HashMap<Integer,MazePacket> incomingQ) {
-		MazeClientHandler.incomingQ = incomingQ;
-	}
-
-	public static HashMap<Integer,MazePacket> getIncomingQ() {
-		return incomingQ;
-	}
-
 
 
 	/* Internals ******************************************************/    
@@ -406,12 +355,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	private static final int FIRE 			= 4;
 	private static final int ADD 			= 7;
 	
-	/* Queue */
-	/*
-	 *  We can use HashMap as incoming queue. All we have to do is use SEQ# as identifier.
-	 *  Making it public for other threads to see. 
-	 */
-	public static HashMap<Integer,MazePacket> incomingQ;
+
 	
 	/* Socket for the Ticketing Service */
 	private static Socket tickets				= null;
