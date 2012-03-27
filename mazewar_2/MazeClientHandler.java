@@ -85,7 +85,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			// Create an NS_REGISTER message for the Server
 			MazePacket packetToNamingService = new MazePacket();
 			ClientIP my_location[] = new ClientIP[1];
-			my_location[0] = new ClientIP(theGUIClient.getName(), my_hostname ,my_port);
+			my_location[0] = new ClientIP(theGUIClient.getName(), my_hostname, my_port, -1);
 			packetToNamingService.type = MazePacket.NS_REGISTER;
 			packetToNamingService.ClientName = theGUIClient.getName();
 			packetToNamingService.locations = my_location;
@@ -111,19 +111,15 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			MazePacket packetFromNaming = (MazePacket) NS_in.readObject();
 			// Process the packet
 			assert (packetFromNaming.type == MazePacket.NS_REPLY);
-			for (ClientIP item : packetFromNaming.locations) {
-				if (item.client_name.compareTo(theGUIClient.getName())==0) {
-					// Do nothing - do not add yourself
-				} else {
-					// Add the client
-					try {
-						addClient(item);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					if(DEBUG) {
-						System.out.println ("[CLIENT DEBUG] Successfully registered and added client " + item.client_name + " - IP: " + item.client_host + " " + item.client_port);
-					}
+			for (int i = 0; i<packetFromNaming.NumClients-1; i++) {
+				// Add the client
+				try {
+					addClient(packetFromNaming.locations[i]);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				if(DEBUG) {
+					System.out.println ("[CLIENT DEBUG] Successfully registered and added client " + packetFromNaming.locations[i].client_name + " - " + packetFromNaming.locations[i].toString());
 				}
 			}
 		} catch (IOException e) {

@@ -54,6 +54,7 @@ public class MazeNamingServiceHandlerThread extends Thread{
 					}
 					
 					// 2 - Add the ip to the ip_lookup cache
+					packetFromClient.locations[0].client_number = NumClients;
 					ip_lookup.put(packetFromClient.ClientName, packetFromClient.locations[0]);
 					NumClients ++;
 					if (DEBUG) {
@@ -67,12 +68,10 @@ public class MazeNamingServiceHandlerThread extends Thread{
 					
 					// 3 - Prepare the location array sent in the reply message for the client
 					ClientIP location[] = new ClientIP[NumClients];
-					int index = 0;
 					for (Enumeration e = ip_lookup.keys(); e.hasMoreElements();)
 					{
 						String index_ClientName = (String) e.nextElement(); 
-						location[index] = ip_lookup.get(index_ClientName);
-						index ++;
+						location[ip_lookup.get(index_ClientName).client_number] = ip_lookup.get(index_ClientName);
 					}
 					
 					// 4 - Send the reply message for the client
@@ -80,18 +79,16 @@ public class MazeNamingServiceHandlerThread extends Thread{
 					packetToClient.type = MazePacket.NS_REPLY;
 					packetToClient.ClientName = packetFromClient.ClientName;
 					packetToClient.locations = location;
+					packetToClient.NumClients = NumClients;
 					toClient.writeObject(packetToClient);
 					
 					// 5 - Now prepare to notify everyone else about the new client added
 					MazePacket packetToBroadcast = new MazePacket();
-					//ClientIP new_location[] = new ClientIP[1];
-					//new_location[0] = ip_lookup.get(packetFromClient.ClientName);
 					packetToBroadcast.type = MazePacket.NS_ADD;
 					packetToBroadcast.ClientName = packetFromClient.ClientName;
 					packetToBroadcast.locations = packetFromClient.locations;
 					
 					// 6 - Broadcast
-					// TODO: We do not need to broadcast if every new client gets list of existing clients because it can establish connection with them. 
 					Iterator ossi = outputStreamSet.iterator();
 					while (ossi.hasNext()) {
 						Object o = ossi.next();

@@ -48,7 +48,7 @@ public class TicketServiceThread extends Thread{
 				if(packetFromClient.type == MazePacket.GET_SEQs) {
 					System.out.println("[TICKET SERVER] Got a ticket request.");
 					
-					// 4 - Send the reply message for the client
+					// Send the reply message for the client
 					MazePacket packetToClient = new MazePacket();
 					packetToClient.type = MazePacket.SEQs;
 					packetToClient.ClientName = packetFromClient.ClientName;

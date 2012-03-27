@@ -10,17 +10,19 @@ class ClientIP implements Serializable {
 	public String  client_name;
 	public String  client_host;
 	public Integer client_port;
+	public Integer client_number;
 	
 	/* constructor */
-	public ClientIP(String client_name, String host, Integer port) {
+	public ClientIP(String client_name, String host, Integer port, Integer number) {
 		this.client_name = client_name;
 		this.client_host = host;
 		this.client_port = port;
+		this.client_number = number;
 	}
 	
 	/* printable output */
 	public String toString() {
-		return " HOST: " + client_host + " PORT: " + client_port; 
+		return " HOST: " + client_host + " PORT: " + client_port + " NUMBER:" + client_number; 
 	}
 	
 }
@@ -52,8 +54,8 @@ public class MazePacket implements Serializable {
 	/* client name */
 	public String ClientName;
 	
-	/* server max player */
-	public int MaxNumClient;
+	/* number of registered clients */
+	public int NumClients;
 	
 	/* client event */
 	public int ce;
