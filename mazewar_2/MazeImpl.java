@@ -680,6 +680,13 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
          * play.
          */
         private final Set clientFired = new HashSet();
+        
+        /* Test if client has fired */
+        public boolean checkShot(Client client)
+        {
+        	if (this.clientFired.contains(client))	return true;
+        	else 									return false;
+        }
        
         /**
          * The thread used to manage {@link Projectile}s.
