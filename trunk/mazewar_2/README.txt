@@ -15,4 +15,4 @@ This will launch local client 2
 
 To add a robot client do:
 >> run.sh localhost 4444 7777 1
-One at the end indicates that cllient is a robot.
+The one at the end indicates that client is a robot. Make sure to add the robot once everyone has joined the game.
