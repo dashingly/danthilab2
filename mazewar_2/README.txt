@@ -6,9 +6,11 @@ Running the Distributed MazeWar:
 So here's how to launch a game:
 
 >> namingService.sh 4444 # launch the naming service
->> run.sh localhost 4444 5555 # launch local client 1
+>> run.sh localhost 4444 5555 0
+This will launch local client 1
         // enter your name in the box (Danil)
->> run.sh localhost 4444 6666 # launch local client 2
+>> run.sh localhost 4444 6666 0
+This will launch local client 2
         // enter your name in the box (Thierry)
 
 To add a robot client do:
