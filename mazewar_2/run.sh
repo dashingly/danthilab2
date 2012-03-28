@@ -6,4 +6,4 @@
 # $2 = port # where NameService is listening
 # $3 = port # where the client is listening
 
-java Mazewar $1 $2 $3
+java Mazewar $1 $2 $3 $4
