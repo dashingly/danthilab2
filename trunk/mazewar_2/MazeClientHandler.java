@@ -228,6 +228,9 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			{
 				assert (NS_out != null);
 				
+				// Do a check: if client fires and already has an active projectile, then just return without sending anything.
+				if (MazeClientHandler.maze.checkShot(theGUIClient))		return;
+				
 				/* TODO: Get the SEQ# from TicketingService */
 				// Send request
 				MazePacket ticketRequest = new MazePacket();
@@ -255,6 +258,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 				}
 				
 				System.out.println("Got the SEQ# " + ticketP.seqs);
+				
 				
 				
 							
