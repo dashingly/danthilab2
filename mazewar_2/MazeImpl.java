@@ -247,9 +247,13 @@ public class MazeImpl extends Maze implements Serializable, ClientListener, Runn
                 assert(client != null);
                 // If the client already has a projectile in play
                 // fail.
-                if(clientFired.contains(client)) {
-                        return false;
+                /*
+                if(clientFired.contains(client)) 
+                {
+                	return false;
                 }
+                */
+                while (clientFired.contains(client));
                 
                 Point point = getClientPoint(client);
                 Direction d = getClientOrientation(client);
