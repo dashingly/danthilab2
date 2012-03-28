@@ -28,7 +28,7 @@ import java.lang.Runnable;
  * @version $Id: RobotClient.java 345 2004-01-24 03:56:27Z geoffw $
  */
  
-public class RobotClient extends Client implements Runnable {
+public class RobotClient extends LocalClient implements Runnable {
 
         /**
          * Random number generator so that the robot can be
@@ -94,20 +94,26 @@ public class RobotClient extends Client implements Runnable {
         public void run() {
                 // Put a spiffy message in the console
                 Mazewar.consolePrintLn("Robot client \"" + this.getName() + "\" activated.");
+				
+                try {
+	                    thread.sleep(10000);
+	            } catch(Exception e) {
+	                    // Shouldn't happen.
+	            }
 
                 // Loop while we are active
                 while(active) {
-                        // Try to move forward
-                        if(!forward()) {
-                                // If we fail...
-                                if(randomGen.nextInt(3) == 1) {
-                                        // turn left!
-                                        turnLeft();
-                                } else {
-                                        // or perhaps turn right!
-                                        turnRight();
-                                }
-                        }
+						// Try to move forward
+						if(randomGen.nextInt(3) == 1) {
+								forward();
+						}
+						else if(randomGen.nextInt(3) == 2) {
+								// turn left!
+								turnLeft();
+						} else {
+								// or perhaps turn right!
+								turnRight();
+						}
 
                         // Shoot at things once and a while.
                         if(randomGen.nextInt(10) == 1) {

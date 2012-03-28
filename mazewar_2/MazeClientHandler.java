@@ -23,7 +23,7 @@ class ClientConnection implements Serializable {
 public class MazeClientHandler implements Serializable, ClientListener, Runnable {
 	
 	// Constructor
-	public MazeClientHandler(String NS_hostname, int NS_port, String my_hostname, int my_port, GUIClient client, MazeImpl mazeStr) {
+	public MazeClientHandler(String NS_hostname, int NS_port, String my_hostname, int my_port, Client client, MazeImpl mazeStr) {
 		this.NS_hostname = NS_hostname;
 		this.NS_port = NS_port;
 		this.my_hostname = my_hostname;
@@ -135,7 +135,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			System.out.println("[CLIENT DEBUG] Successfully added client " + theGUIClient.getName());
 		}
 		
-		// 4 - Listen to additional joins from other clients
+		// 3 - Listen to additional joins from other clients
 		try {
 			MazePacket addPacketFromNaming;
 			while (( addPacketFromNaming = (MazePacket) NS_in.readObject()) != null) {
@@ -228,9 +228,6 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 			{
 				assert (NS_out != null);
 				
-				// Do a check: if client fires and already has an active projectile, then just return without sending anything.
-				if (MazeClientHandler.maze.checkShot(theGUIClient))		return;
-				
 				/* TODO: Get the SEQ# from TicketingService */
 				// Send request
 				MazePacket ticketRequest = new MazePacket();
@@ -258,7 +255,6 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 				}
 				
 				System.out.println("Got the SEQ# " + ticketP.seqs);
-				
 				
 				
 							
@@ -310,8 +306,6 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	}
 
 
-
-
 	/* Internals ******************************************************/    
 	// NameService Info
 	private static String NS_hostname = null;
@@ -325,7 +319,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	private static ObjectInputStream NS_in = null;
 	
 	// Reference to the GUIClient we are listening to
-	public static GUIClient theGUIClient = null;
+	public static Client theGUIClient = null;
 	// Reference to the maze with all the clients.
 	public static MazeImpl maze;
 	
@@ -356,6 +350,7 @@ public class MazeClientHandler implements Serializable, ClientListener, Runnable
 	private static final int TURN_RIGHT 	= 3;
 	private static final int FIRE 			= 4;
 	private static final int ADD 			= 7;
+	
 
 	
 	/* Socket for the Ticketing Service */
