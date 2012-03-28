@@ -67,7 +67,7 @@ public class Mazewar extends JFrame {
          * The {@link GUIClient} for the game.
          */
         private GUIClient guiClient = null;
-
+		
         /**
          * The panel that displays the {@link Maze}.
          */
@@ -135,10 +135,12 @@ public class Mazewar extends JFrame {
 				String my_hostname = "ug160.eecg.utoronto.ca";
 				int NS_port = 4444;
 				int my_port = 4444;
-				if(args.length == 3 ) {
+				int robot = 0;
+				if(args.length == 4 ) {
 					NS_hostname = args[0];
 					NS_port = Integer.parseInt(args[1]);
 					my_port = Integer.parseInt(args[2]);
+					robot = Integer.parseInt(args[3]);
 				} else {
 					System.err.println("ERROR: Invalid arguments!");
 					System.exit(-1);
@@ -163,33 +165,39 @@ public class Mazewar extends JFrame {
                 maze.addMazeListener(scoreModel);
                 
                 // Throw up a dialog to get the GUIClient name.
-                String name = JOptionPane.showInputDialog("Enter your name");
-                if((name == null) || (name.length() == 0)) {
-                  Mazewar.quit();
-                }
+                String name;
+                if (robot==0) {
+                	name = JOptionPane.showInputDialog("Enter your name");
+	                if((name == null) || (name.length() == 0)) {
+	                  Mazewar.quit();
+	                }
+                } else {
+					name = JOptionPane.showInputDialog("Enter Robot name");
+	                if((name == null) || (name.length() == 0)) {
+	                  Mazewar.quit();
+	                }
+				}
                 
-                // Create the GUIClient and connect it to the KeyListener queue
-                guiClient = new GUIClient(name);
-                this.addKeyListener(guiClient);
-
-				// TM: Client Listener that connects to network
-				MazeClientHandler networkClientListener = new MazeClientHandler(NS_hostname, NS_port, my_hostname, my_port, guiClient, maze);
-				guiClient.addClientListener(networkClientListener);
-				
-                // Use braces to force constructors not to be called at the beginning of the
-                // constructor.
-                /*
-                {
-                        maze.addClient(new RobotClient("Norby"));
-                        maze.addClient(new RobotClient("Robbie"));
-                        maze.addClient(new RobotClient("Clango"));
-                        maze.addClient(new RobotClient("Marvin"));
-                }
-                */
-
+                RobotClient RoboClient[] = new RobotClient[robot];
+				if (robot==0) {
+					// Create the GUIClient and connect it to the KeyListener queue
+					guiClient = new GUIClient(name);
+					this.addKeyListener(guiClient);
+					// TM: Client Listener that connects to network
+					MazeClientHandler networkClientListener = new MazeClientHandler(NS_hostname, NS_port, my_hostname, my_port, guiClient, maze);
+					guiClient.addClientListener(networkClientListener);
+				} else {
+					RoboClient[0] = new RobotClient(name);
+					MazeClientHandler networkClientListener = new MazeClientHandler(NS_hostname, NS_port, my_hostname, my_port, RoboClient[0], maze);
+					RoboClient[0].addClientListener(networkClientListener);
+				}
                 
                 // Create the panel that will display the maze.
-                overheadPanel = new OverheadMazePanel(maze, guiClient);
+				if (robot==0) {
+					overheadPanel = new OverheadMazePanel(maze, guiClient);
+				} else {
+					overheadPanel = new OverheadMazePanel(maze, RoboClient[0]);
+				}
                 assert(overheadPanel != null);
                 maze.addMazeListener(overheadPanel);
                 

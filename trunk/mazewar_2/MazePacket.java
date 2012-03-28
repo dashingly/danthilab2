@@ -42,6 +42,8 @@ public class MazePacket implements Serializable {
 	
 	/* error codes */
 	public static final int ERROR_INVALID_SYMBOL   = -101;
+	
+	/* Ticket Service */
 	public static final int GET_SEQs 	= 777;
 	public static final int SEQs 		= 778;
 	
