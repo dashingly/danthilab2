@@ -1,6 +1,4 @@
 README File
-Thierry Moreau 996368746
-Danil Shevelev 995118858
 
 Running the Distributed MazeWar:
 	- Execute the make command.
